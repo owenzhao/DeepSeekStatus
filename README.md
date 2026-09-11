@@ -101,8 +101,8 @@ Or just open `DeepSeekStatus.xcodeproj` in Xcode, select the `DeepSeekStatus` sc
 
 ### Prebuilt app
 
-1. Download **[`DeepSeekStatus-1.0.1.zip`](https://github.com/owenzhao/DeepSeekStatus/releases/latest/download/DeepSeekStatus-1.0.1.zip)**
-   (or pick another version from the [Releases page](https://github.com/owenzhao/DeepSeekStatus/releases)).
+1. Grab the newest `DeepSeekStatus-<version>.zip` from the
+   **[Releases page](https://github.com/owenzhao/DeepSeekStatus/releases/latest)**.
    The binary is universal — Apple Silicon and Intel — and needs macOS 14.0 or later.
 2. Unzip it and drag `DeepSeekStatus.app` into `/Applications`.
 3. The app is signed with a **Developer ID and notarized by Apple**, so it launches without a
