@@ -40,6 +40,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         observeStore()
         renderMenuBar()
         runDiagnosticsIfRequested()
+        runUpdateCheckIfRequested()
+    }
+
+    /// 开发用：`DEEPSEEK_STATUS_CHECK_UPDATES=1` 启动后立刻手动检查一次更新，
+    /// 配合 `Updater` 里的自检代理，可以在命令行里直接看到「能否发现新版本」。
+    private func runUpdateCheckIfRequested() {
+        guard ProcessInfo.processInfo.environment["DEEPSEEK_STATUS_CHECK_UPDATES"] == "1" else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [self] in
+            print("[诊断] 手动触发一次更新检查，更新源=\(Bundle.main.infoDictionary?["SUFeedURL"] as? String ?? "（未配置）")")
+            updater.checkForUpdates()
+        }
     }
 
     /// 启动参数覆盖，方便截图和排查：
@@ -120,7 +131,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             print("[诊断] 最近 2 秒 SwiftUI 画布重绘 \(drawn) 帧 ≈ \(Double(drawn) / 2.0) fps（只剩弹窗水族箱）")
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3.6) {
+        // 触发更新检查时要留出网络往返时间，别把还在检查的进程提前杀掉。
+        let lifetime: TimeInterval = ProcessInfo.processInfo.environment["DEEPSEEK_STATUS_CHECK_UPDATES"] == "1"
+            ? 25 : 3.6
+        DispatchQueue.main.asyncAfter(deadline: .now() + lifetime) {
             NSApp.terminate(nil)
         }
     }

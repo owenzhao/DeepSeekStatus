@@ -371,7 +371,8 @@ With the panel closed, idle CPU is 0.0% and the menu bar icon does not repaint (
   (`screencapture` fails with "could not create image from display"), which is why verification
   relies on offscreen `ImageRenderer` output plus `cacheDisplay` captures from inside the app.
 - The schedule is a weekday/time-of-day rule; there is no holiday calendar.
-- The app is ad-hoc signed. Distributing a build to other machines requires notarization, or the
-  quarantine workaround described in the README.
+- The app is signed with a Developer ID and notarized. `Tools/release.sh` additionally re-signs
+  Sparkle's nested helpers (`Autoupdate`, `Updater.app`, and the two XPC services), which
+  `xcodebuild` leaves ad-hoc — notarization rejects them otherwise.
 - `WhaleStatusItemView` (Core Animation) is compiled but unused. Re-enabling it means solving the
   status item snapshot cost from section 4.1 first.

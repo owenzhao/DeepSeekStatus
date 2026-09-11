@@ -206,19 +206,12 @@ struct PopoverView: View {
 
     private var optionsSection: some View {
         VStack(alignment: .leading, spacing: 9) {
-            Toggle(String(localized: "popover.option.countdown", defaultValue: "Show countdown in menu bar"),
-                   isOn: $store.showsCountdownInMenuBar)
-                .toggleStyle(.switch)
-                .controlSize(.mini)
-                .font(.system(size: 11.5))
-                .frame(maxWidth: .infinity, alignment: .leading)
+            settingToggle(String(localized: "popover.option.countdown",
+                                  defaultValue: "Show countdown in menu bar"),
+                          isOn: $store.showsCountdownInMenuBar)
 
-            Toggle(String(localized: "popover.option.launchAtLogin", defaultValue: "Launch at login"),
-                   isOn: $store.launchAtLogin)
-                .toggleStyle(.switch)
-                .controlSize(.mini)
-                .font(.system(size: 11.5))
-                .frame(maxWidth: .infinity, alignment: .leading)
+            settingToggle(String(localized: "popover.option.launchAtLogin", defaultValue: "Launch at login"),
+                          isOn: $store.launchAtLogin)
 
             if let message = store.launchAtLoginMessage {
                 Text(message)
@@ -245,13 +238,11 @@ struct PopoverView: View {
                 .frame(width: 170)
             }
 
-            HStack(spacing: 6) {
-                Toggle(String(localized: "popover.option.autoUpdate",
-                              defaultValue: "Auto-check for updates"),
-                       isOn: automaticallyChecksForUpdates)
-                    .toggleStyle(.switch)
-                    .controlSize(.mini)
-                    .font(.system(size: 11.5))
+            settingToggle(String(localized: "popover.option.autoUpdate",
+                                 defaultValue: "Auto-check for updates"),
+                          isOn: automaticallyChecksForUpdates)
+
+            HStack(spacing: 0) {
                 Spacer(minLength: 0)
                 Button(String(localized: "popover.update.checkNow", defaultValue: "Check Now")) {
                     onCheckForUpdates()
@@ -260,6 +251,18 @@ struct PopoverView: View {
                 .font(.system(size: 10.5, weight: .semibold))
             }
         }
+    }
+
+    /// 所有开关统一成一行：文案占满左侧、开关固定贴右边缘。
+    /// 直接写 `Toggle` 时它只有内容宽度，开关会跟着文案长短左右跳，三行就对不齐了。
+    private func settingToggle(_ title: String, isOn: Binding<Bool>) -> some View {
+        Toggle(isOn: isOn) {
+            Text(title)
+                .font(.system(size: 11.5))
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .toggleStyle(.switch)
+        .controlSize(.mini)
     }
 
     // MARK: - 页脚

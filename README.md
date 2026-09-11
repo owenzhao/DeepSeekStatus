@@ -31,7 +31,7 @@ next to the menu bar icon.
 | Peak hours (`×1.0`) | Off-peak hours (`×0.5`) |
 | :---: | :---: |
 | <img src="Preview/live-panel-peak.png" width="330" alt="Panel during peak hours"> | <img src="Preview/live-panel-offPeak.png" width="330" alt="Panel during off-peak hours"> |
-| *Captured live; the banner is the preview mode being on.* | *Captured live during off-peak hours.* |
+| *Captured live during peak hours.* | *Captured live; the banner is preview mode being on.* |
 
 Menu bar in both states and on different menu bar backgrounds:
 
@@ -105,12 +105,8 @@ Or just open `DeepSeekStatus.xcodeproj` in Xcode, select the `DeepSeekStatus` sc
    (or pick another version from the [Releases page](https://github.com/owenzhao/DeepSeekStatus/releases)).
    The binary is universal — Apple Silicon and Intel — and needs macOS 14.0 or later.
 2. Unzip it and drag `DeepSeekStatus.app` into `/Applications`.
-3. The app is signed ad-hoc and is **not notarized**, so the first launch is blocked by Gatekeeper.
-   Either right-click the app → **Open** → **Open**, or clear the quarantine flag once:
-
-   ```bash
-   xattr -dr com.apple.quarantine /Applications/DeepSeekStatus.app
-   ```
+3. The app is signed with a **Developer ID and notarized by Apple**, so it launches without a
+   Gatekeeper prompt — no quarantine workaround needed.
 
 Either way the app has **no Dock icon** — look for the whale in the menu bar, right of the
 menu bar extras.
