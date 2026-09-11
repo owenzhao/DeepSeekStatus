@@ -6,6 +6,7 @@
 
 <img src="Preview/menubar-gray-peak.png" width="640" alt="DeepSeek Status in the menu bar">
 
+[![Download](https://img.shields.io/github/v/release/owenzhao/DeepSeekStatus?label=download&color=4D6BFE)](https://github.com/owenzhao/DeepSeekStatus/releases/latest)
 [![Platform](https://img.shields.io/badge/platform-macOS%2014%2B-blue)](#requirements)
 [![Swift](https://img.shields.io/badge/Swift-5-orange)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
@@ -100,7 +101,9 @@ Or just open `DeepSeekStatus.xcodeproj` in Xcode, select the `DeepSeekStatus` sc
 
 ### Prebuilt app
 
-1. Download `DeepSeekStatus.zip` from the **Releases** page of this repository.
+1. Download **[`DeepSeekStatus-1.0.zip`](https://github.com/owenzhao/DeepSeekStatus/releases/latest/download/DeepSeekStatus-1.0.zip)**
+   (or pick another version from the [Releases page](https://github.com/owenzhao/DeepSeekStatus/releases)).
+   The binary is universal — Apple Silicon and Intel — and needs macOS 14.0 or later.
 2. Unzip it and drag `DeepSeekStatus.app` into `/Applications`.
 3. The app is signed ad-hoc and is **not notarized**, so the first launch is blocked by Gatekeeper.
    Either right-click the app → **Open** → **Open**, or clear the quarantine flag once:
