@@ -37,6 +37,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         store.start()
         applyLaunchOverrides()
         configureStatusItem()
+        // Sparkle 弹出任何自己的窗口前，先把面板收起来 —— 否则普通层级的更新窗口
+        // 会被 .statusBar 层级的面板整个盖住（见 Updater.willShowModalUI）。
+        updater.willShowModalUI = { [weak self] in self?.hidePanel() }
         observeStore()
         renderMenuBar()
         runDiagnosticsIfRequested()
@@ -262,7 +265,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                                onQuit: { NSApp.terminate(nil) },
                                maxHeight: limit,
                                automaticallyChecksForUpdates: self.autoCheckBinding,
-                               onCheckForUpdates: { self.updater.checkForUpdates() })
+                               onCheckForUpdates: { self.checkForUpdates() })
         }
         let contentView = NSHostingView(rootView: makeContent(nil))
         contentView.frame = NSRect(x: 0, y: 0, width: PopoverView.width, height: 100)
@@ -447,6 +450,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc private func checkForUpdates() {
+        // 面板是 .statusBar 层级，会盖住 Sparkle 的窗口，先收起来。
+        hidePanel()
         updater.checkForUpdates()
     }
 
