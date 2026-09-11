@@ -76,7 +76,7 @@ struct WeekScheduleGrid: View {
 
         for row in 0..<rows {
             let weekdayLabel = context.resolve(
-                Text(rowLabels[row])
+                Text(verbatim: rowLabels[row])
                     .font(.system(size: 8, weight: row == currentRow ? .bold : .medium))
                     .foregroundStyle(row == currentRow ? Color.primary : Color.secondary)
             )
@@ -101,14 +101,14 @@ struct WeekScheduleGrid: View {
         let tickY = CGFloat(rows) * (cellHeight + gap) + 1
         for hour in [0, 6, 12, 18] {
             let label = context.resolve(
-                Text("\(hour)").font(.system(size: 7.5)).foregroundStyle(Color.secondary)
+                Text(verbatim: "\(hour)").font(.system(size: 7.5)).foregroundStyle(Color.secondary)
             )
             context.draw(label,
                          at: CGPoint(x: labelWidth + CGFloat(hour) * (cellWidth + gap) + cellWidth / 2, y: tickY),
                          anchor: .top)
         }
         let endLabel = context.resolve(
-            Text("24").font(.system(size: 7.5)).foregroundStyle(Color.secondary)
+            Text(verbatim: "24").font(.system(size: 7.5)).foregroundStyle(Color.secondary)
         )
         context.draw(endLabel,
                      at: CGPoint(x: labelWidth + CGFloat(columns) * (cellWidth + gap) - gap, y: tickY),

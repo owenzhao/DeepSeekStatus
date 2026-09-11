@@ -3,7 +3,6 @@
   "strings" : {
     "aquarium.beijingTime" : {
       "comment" : "Label in the top-right corner of the aquarium.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -21,7 +20,6 @@
     },
     "duration.day.one" : {
       "comment" : "Countdown duration, exactly one day.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -39,7 +37,6 @@
     },
     "duration.day.other" : {
       "comment" : "Countdown duration, N days.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -57,7 +54,6 @@
     },
     "duration.hour.one" : {
       "comment" : "Countdown duration, exactly one hour.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -75,7 +71,6 @@
     },
     "duration.hour.other" : {
       "comment" : "Countdown duration, N hours.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -93,7 +88,6 @@
     },
     "duration.minute.one" : {
       "comment" : "Countdown duration, exactly one minute.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -111,7 +105,6 @@
     },
     "duration.minute.other" : {
       "comment" : "Countdown duration, N minutes.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -129,7 +122,6 @@
     },
     "duration.second.one" : {
       "comment" : "Countdown duration, exactly one second.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -147,7 +139,6 @@
     },
     "duration.second.other" : {
       "comment" : "Countdown duration, N seconds.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -165,7 +156,6 @@
     },
     "launchAtLogin.failed" : {
       "comment" : "Shown when registering the login item fails. %@ is the system error description.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -183,7 +173,6 @@
     },
     "launchAtLogin.needsApproval" : {
       "comment" : "Shown when the login item needs approval in System Settings.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -201,7 +190,6 @@
     },
     "menu.checkForUpdates" : {
       "comment" : "Status item context menu: check for updates now.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -219,7 +207,6 @@
     },
     "menu.preview.live" : {
       "comment" : "Status item context menu: follow the real clock.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -237,7 +224,6 @@
     },
     "menu.preview.offPeak" : {
       "comment" : "Status item context menu: preview the off-peak look.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -255,7 +241,6 @@
     },
     "menu.preview.peak" : {
       "comment" : "Status item context menu: preview the peak look.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -273,7 +258,6 @@
     },
     "menu.quit" : {
       "comment" : "Status item context menu: quit the app.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -291,7 +275,6 @@
     },
     "menu.showCountdown" : {
       "comment" : "Status item context menu: toggle the menu bar countdown.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -309,7 +292,6 @@
     },
     "period.offPeak.priceText" : {
       "comment" : "Off-peak price relative to the peak price.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -327,7 +309,6 @@
     },
     "period.offPeak.shortTitle" : {
       "comment" : "Short off-peak name for tight spaces.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -345,7 +326,6 @@
     },
     "period.offPeak.summary" : {
       "comment" : "One-line explanation of the off-peak period.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -363,7 +343,6 @@
     },
     "period.offPeak.title" : {
       "comment" : "Full off-peak period name.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -381,7 +360,6 @@
     },
     "period.peak.priceText" : {
       "comment" : "Peak price relative to the peak price.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -399,7 +377,6 @@
     },
     "period.peak.shortTitle" : {
       "comment" : "Short peak name for tight spaces.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -417,7 +394,6 @@
     },
     "period.peak.summary" : {
       "comment" : "One-line explanation of the peak period.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -435,7 +411,6 @@
     },
     "period.peak.title" : {
       "comment" : "Full peak period name.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -453,7 +428,6 @@
     },
     "popover.countdown.detail" : {
       "comment" : "When the next period starts. %1$@ is the localized transition time (e.g. “tomorrow 09:00”), %2$@ is the period name.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -471,7 +445,6 @@
     },
     "popover.countdown.title" : {
       "comment" : "Countdown row title. %@ is the name of the next period.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -489,7 +462,6 @@
     },
     "popover.currentRate" : {
       "comment" : "Label above the current unit price.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -507,7 +479,6 @@
     },
     "popover.footnote.beijing" : {
       "comment" : "Footnote explaining that every time is Beijing time.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -525,7 +496,6 @@
     },
     "popover.footnote.localZone" : {
       "comment" : "Appended to the Beijing-time footnote when the Mac is in another time zone. %@ is the time zone identifier.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -543,7 +513,6 @@
     },
     "popover.option.autoUpdate" : {
       "comment" : "Toggle: let the app check for updates in the background.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -561,7 +530,6 @@
     },
     "popover.option.countdown" : {
       "comment" : "Toggle: show the countdown in the menu bar.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -579,7 +547,6 @@
     },
     "popover.option.launchAtLogin" : {
       "comment" : "Toggle: launch the app at login.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -597,7 +564,6 @@
     },
     "popover.preview.auto" : {
       "comment" : "Preview picker: follow the real clock.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -615,7 +581,6 @@
     },
     "popover.preview.banner" : {
       "comment" : "Banner shown while previewing a period. %@ is the period name.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -633,7 +598,6 @@
     },
     "popover.preview.label" : {
       "comment" : "Label in front of the preview picker.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -651,7 +615,6 @@
     },
     "popover.preview.resume" : {
       "comment" : "Button that leaves preview mode.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -669,7 +632,6 @@
     },
     "popover.quit" : {
       "comment" : "Footer button that quits the app.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -687,7 +649,6 @@
     },
     "popover.schedule.offPeak.detail" : {
       "comment" : "Off-peak rule description.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -705,7 +666,6 @@
     },
     "popover.schedule.peak.detail" : {
       "comment" : "Peak rule description. Shared by the panel and the weekly grid.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -723,7 +683,6 @@
     },
     "popover.schedule.title" : {
       "comment" : "Heading of the schedule rules block.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -742,7 +701,6 @@
     },
     "popover.update.checkNow" : {
       "comment" : "Button that triggers a manual update check.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -760,7 +718,6 @@
     },
     "schedule.legend.offPeak" : {
       "comment" : "Weekly grid legend: off-peak cells.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -778,7 +735,6 @@
     },
     "schedule.legend.peak" : {
       "comment" : "Weekly grid legend: peak cells.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -796,7 +752,6 @@
     },
     "transition.dayAfterTomorrow" : {
       "comment" : "Transition happens the day after tomorrow. %@ is a time such as “09:00”.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -814,7 +769,6 @@
     },
     "transition.today" : {
       "comment" : "Transition happens today. %@ is a time such as “14:00”.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -832,7 +786,6 @@
     },
     "transition.tomorrow" : {
       "comment" : "Transition happens tomorrow. %@ is a time such as “09:00”.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -850,7 +803,6 @@
     },
     "transition.weekday" : {
       "comment" : "Transition within the coming week. %1$@ is the weekday, %2$@ is the time.",
-      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {

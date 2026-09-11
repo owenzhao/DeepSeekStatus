@@ -43,6 +43,7 @@ DeepSeekStatus/
 │   ├── build.sh                       # Command line build / run
 │   ├── render-preview.sh              # Render the UI offscreen to PNG
 │   ├── release.sh                     # Release + signed appcast for Sparkle
+│   ├── update-strings.sh              # Re-extract + sync Localizable.xcstrings
 │   └── Snapshot/main.swift            # The offscreen renderer / self-check harness
 ├── Docs/DEVELOPMENT.md                # This file
 └── Preview/                           # Generated renders (regenerable)
@@ -173,6 +174,11 @@ is `en`.
   `project.pbxproj` edit.
 - Call sites use explicit semantic keys, e.g.
   `String(localized: "period.peak.title", defaultValue: "Peak hours")`.
+- The catalog is **maintained by Xcode's tooling, not by hand**: `./Tools/update-strings.sh` builds
+  (emitting a `.stringsdata` per source file) and runs `xcstringstool sync` to merge the keys found in
+  source. `extractionState` is only ever written by the Xcode IDE, so the committed file carries none.
+- Anything numeric or symbolic drawn with `Text(...)` must use `Text(verbatim:)`, otherwise it is
+  extracted as a localizable key — that is how `"24"`, `"%lld"` and `"×%@"` sneaked into a first draft.
 - Dynamic strings keep explicit placeholders and are composed with `String(format:)`, e.g.
   `popover.countdown.detail` = `"Switches to %2$@ %1$@"` / `"%1$@ 起转为%2$@"`.
 - English plurals use separate `.one` / `.other` keys chosen in `PricingFormatter` (`1 day` vs `%lld days`).

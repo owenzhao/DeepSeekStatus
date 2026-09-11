@@ -66,7 +66,7 @@ struct PopoverView: View {
                 Text(period.title)
                     .font(.system(size: 19, weight: .bold))
                 Spacer()
-                Text("×\(String(format: "%.1f", period.priceMultiplier))")
+                Text(verbatim: "×\(String(format: "%.1f", period.priceMultiplier))")
                     .font(.system(size: 15, weight: .bold, design: .rounded))
                     .foregroundStyle(WhaleTheme.accent(for: period))
             }
