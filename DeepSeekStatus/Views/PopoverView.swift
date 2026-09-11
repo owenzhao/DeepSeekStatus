@@ -8,6 +8,10 @@ struct PopoverView: View {
 
     @ObservedObject var store: PricingStore
     var onQuit: () -> Void
+    /// 自动检查更新开关 + 手动检查回调。
+    /// 刻意用 `Binding` / 闭包而不是直接引用 Sparkle，离屏渲染工具才能不链接 Sparkle 编译这些视图。
+    var automaticallyChecksForUpdates: Binding<Bool> = .constant(false)
+    var onCheckForUpdates: () -> Void = {}
 
     private var period: PricePeriod { store.period }
     private var snapshot: PricingSnapshot { store.snapshot }
@@ -239,6 +243,21 @@ struct PopoverView: View {
                 .labelsHidden()
                 .controlSize(.small)
                 .frame(width: 170)
+            }
+
+            HStack(spacing: 6) {
+                Toggle(String(localized: "popover.option.autoUpdate",
+                              defaultValue: "Auto-check for updates"),
+                       isOn: automaticallyChecksForUpdates)
+                    .toggleStyle(.switch)
+                    .controlSize(.mini)
+                    .font(.system(size: 11.5))
+                Spacer(minLength: 0)
+                Button(String(localized: "popover.update.checkNow", defaultValue: "Check Now")) {
+                    onCheckForUpdates()
+                }
+                .buttonStyle(.link)
+                .font(.system(size: 10.5, weight: .semibold))
             }
         }
     }

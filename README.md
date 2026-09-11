@@ -126,6 +126,7 @@ menu bar extras.
 | **Preview** picker in the panel | Force the app to *display* peak or off-peak so you can see both looks at any time. It only changes what is drawn, never the real pricing |
 | **Show countdown in the menu bar** | Adds an `HH:MM:SS` countdown next to the whale (off by default) |
 | **Launch at login** | Registers the app as a login item via `SMAppService` (off by default) |
+| **Auto-check for updates** | Sparkle checks the appcast in the background (on by default). **Check Now** in the panel, or **Check for Updates…** in the right-click menu, runs a check immediately |
 | **Quit** | Quits the app |
 
 The panel contains:
@@ -134,7 +135,7 @@ The panel contains:
 - a "current unit price" comparison bar;
 - the countdown to the next switch, plus how far through the current block you are;
 - a 7×24 weekly heat map — blue = peak, gray = off-peak, with the current hour outlined;
-- the two toggles above and a preview picker.
+- the toggles above, a preview picker, and the update controls.
 
 The panel closes when you click anywhere outside it, press <kbd>Esc</kbd>, or click the whale again.
 
@@ -176,6 +177,12 @@ English (the default) and Simplified Chinese. The interface follows the language
 **System Settings → General → Language & Region → Applications**; the pricing schedule itself is always
 computed in Beijing time. All UI strings live in a single String Catalog
 (`DeepSeekStatus/Localizable.xcstrings`), so adding another language is just another column there.
+
+**How do updates work?**
+The app ships [Sparkle 2](https://sparkle-project.org) and reads the appcast at
+`releases/latest/download/appcast.xml`. Downloads are signed with an EdDSA key and verified before
+anything is installed, and every update is opt-in. Background checks are on by default (one per day)
+and can be turned off in the panel. Maintainers publish with `./Tools/release.sh --upload`.
 
 **Does the countdown update while the Mac is asleep?**
 The app recomputes on wake, on system clock changes, and at midnight, so it is correct as soon as

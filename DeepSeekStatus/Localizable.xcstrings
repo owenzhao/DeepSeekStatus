@@ -199,6 +199,24 @@
         }
       }
     },
+    "menu.checkForUpdates" : {
+      "comment" : "Status item context menu: check for updates now.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check for Updates…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "检查更新…"
+          }
+        }
+      }
+    },
     "menu.preview.live" : {
       "comment" : "Status item context menu: follow the real clock.",
       "extractionState" : "manual",
@@ -523,6 +541,24 @@
         }
       }
     },
+    "popover.option.autoUpdate" : {
+      "comment" : "Toggle: let the app check for updates in the background.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auto-check for updates"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自动检查更新"
+          }
+        }
+      }
+    },
     "popover.option.countdown" : {
       "comment" : "Toggle: show the countdown in the menu bar.",
       "extractionState" : "manual",
@@ -700,6 +736,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "时段规则"
+          }
+        }
+      }
+    },
+    "popover.update.checkNow" : {
+      "comment" : "Button that triggers a manual update check.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check Now"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "立即检查"
           }
         }
       }

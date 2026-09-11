@@ -19,7 +19,9 @@ MODE="${1:-preview}"
 OUT="${2:-Preview}"
 
 # 除 App 入口（含 @main）之外的全部源码，加上快照工具的入口。
-SOURCES=$(find DeepSeekStatus -name '*.swift' ! -name 'DeepSeekStatusApp.swift' | sort)
+# `Support/Updater.swift` 依赖 Sparkle（SPM 二进制框架），这里用 swiftc 单独编译时没有链接它，
+# 所以一并排除；视图层只通过 Binding/闭包接触更新功能，不依赖 Sparkle。
+SOURCES=$(find DeepSeekStatus -name '*.swift' ! -name 'DeepSeekStatusApp.swift' ! -name 'Updater.swift' | sort)
 
 # shellcheck disable=SC2086
 swiftc \

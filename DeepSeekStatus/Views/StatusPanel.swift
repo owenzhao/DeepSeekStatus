@@ -53,16 +53,26 @@ struct StatusPanelContent: View {
     @ObservedObject var store: PricingStore
     var onQuit: () -> Void
     var maxHeight: CGFloat?
+    /// 自动检查更新开关与手动检查回调。界面层只用 `Binding`，不直接依赖 Sparkle。
+    var automaticallyChecksForUpdates: Binding<Bool> = .constant(false)
+    var onCheckForUpdates: () -> Void = {}
+
+    private var content: some View {
+        PopoverView(store: store,
+                    onQuit: onQuit,
+                    automaticallyChecksForUpdates: automaticallyChecksForUpdates,
+                    onCheckForUpdates: onCheckForUpdates)
+    }
 
     var body: some View {
         Group {
             if let maxHeight {
                 ScrollView(.vertical, showsIndicators: true) {
-                    PopoverView(store: store, onQuit: onQuit)
+                    content
                 }
                 .frame(width: PopoverView.width, height: maxHeight)
             } else {
-                PopoverView(store: store, onQuit: onQuit)
+                content
             }
         }
         .background(Color(nsColor: .windowBackgroundColor))

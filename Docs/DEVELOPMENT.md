@@ -24,7 +24,8 @@ DeepSeekStatus/
 │   ├── Support/
 │   │   ├── SVGPath.swift              # SVG path parser (incl. arcs → cubic Béziers)
 │   │   ├── WhaleTheme.swift           # Brand colors and the per-scene palettes
-│   │   └── LaunchAtLogin.swift        # SMAppService wrapper
+│   │   ├── LaunchAtLogin.swift        # SMAppService wrapper
+│   │   └── Updater.swift              # Sparkle auto-update wrapper
 │   ├── Views/
 │   │   ├── WhaleShape.swift           # Official whale vector path + Shape + path cache
 │   │   ├── WhaleScene.swift           # Motion constants + shared SwiftUI drawing
@@ -36,9 +37,12 @@ DeepSeekStatus/
 │   │   ├── PopoverView.swift          # Panel content (SwiftUI)
 │   │   └── StatusPanel.swift          # Panel window: rounded corners + scroll fallback
 │   └── Assets.xcassets                # App icon + accent color
+├── Config/
+│   └── Info.plist                     # Partial Info.plist: only the Sparkle keys
 ├── Tools/
 │   ├── build.sh                       # Command line build / run
 │   ├── render-preview.sh              # Render the UI offscreen to PNG
+│   ├── release.sh                     # Release + signed appcast for Sparkle
 │   └── Snapshot/main.swift            # The offscreen renderer / self-check harness
 ├── Docs/DEVELOPMENT.md                # This file
 └── Preview/                           # Generated renders (regenerable)
@@ -179,6 +183,35 @@ is `en`.
 
 ---
 
+### 2.8 Auto-updates (Sparkle 2)
+
+`Support/Updater.swift` wraps Sparkle 2, added as a Swift Package
+(`https://github.com/sparkle-project/Sparkle`, `upToNextMajorVersion` from 2.6.0). Because the app is
+an `LSUIElement` agent with no `MainMenu.xib`, the controller is created programmatically:
+
+```swift
+SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
+```
+
+- `Config/Info.plist` holds the three keys Sparkle needs — `SUFeedURL`, `SUPublicEDKey` and
+  `SUEnableAutomaticChecks` — and is merged into the generated Info.plist (`GENERATE_INFOPLIST_FILE`
+  stays `YES`). It must live **outside** `DeepSeekStatus/`, otherwise the file-system-synchronized
+  group also copies it into `Contents/Resources`.
+- `INFOPLIST_KEY_*` does **not** work for `SU*` keys: Xcode only honours its own allow-list, so those
+  build settings are silently dropped (verified by building and inspecting the product).
+- The EdDSA key pair lives in the login Keychain (account `ed25519`), created by Sparkle's
+  `generate_keys`. The public key in `Config/Info.plist` must match the private key that signs
+  releases; back the private key up with `generate_keys -x <file>`.
+- `CURRENT_PROJECT_VERSION` (= `CFBundleVersion`) must grow with every release — Sparkle compares it,
+  not `CFBundleShortVersionString`.
+- The views never import Sparkle: `PopoverView` / `StatusPanelContent` take a `Binding<Bool>` plus a
+  closure. That keeps `Tools/render-preview.sh` working, since it compiles the views with plain
+  `swiftc` and only skips `Updater.swift` and the app entry point.
+- Publishing: `./Tools/release.sh` builds Release, zips the app and writes a signed `appcast.xml`
+  whose `--download-url-prefix` points at the GitHub release asset; `--upload` also creates/updates
+  the release. Every release must upload `appcast.xml` as an asset, because `SUFeedURL` points at
+  `releases/latest/download/appcast.xml`.
+
 ## 3. Build & run
 
 ```bash
@@ -288,6 +321,16 @@ cp Preview/AppIcon/*.png DeepSeekStatus/Assets.xcassets/AppIcon.appiconset/
 ```
 
 ---
+
+### 5.4 Publishing a release
+
+```bash
+./Tools/release.sh            # Release build + signed Build/release/archives/appcast.xml
+./Tools/release.sh --upload   # ...and create/upload the GitHub Release (needs gh)
+```
+
+The script shells out to Sparkle's tools, which SwiftPM unpacks into
+`Build/DerivedData/SourcePackages/artifacts/sparkle/Sparkle/bin/` on the first build.
 
 ## 6. Verification
 

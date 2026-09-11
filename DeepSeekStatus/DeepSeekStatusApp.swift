@@ -20,6 +20,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private let store = PricingStore()
+    /// 自动更新（Sparkle）。
+    private let updater = Updater()
     private var statusItem: NSStatusItem?
     private var panel: StatusPanel?
     /// 点击面板外部 / 按 Esc 时关闭面板的事件监听。
@@ -63,6 +65,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         print("[诊断] 当前时段=\(store.period.title) 北京时间=\(PricingFormatter.preciseTime(store.snapshot.now))")
         print("[诊断] 距下次切换=\(PricingFormatter.duration(store.snapshot.secondsUntilTransition)) → \(store.snapshot.nextPeriod.title)")
+        print("[诊断] 更新器可用=\(updater.canCheckForUpdates) 自动检查=\(updater.automaticallyChecksForUpdates)")
 
         // 弹出面板，等布局完成后再检查窗口与内容尺寸。
         // 状态栏窗口要等系统摆好位置（几十毫秒），所以稍等一下再弹，
@@ -75,6 +78,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { [self] in
+            print("[诊断] 0.8 秒后 更新器可用=\(updater.canCheckForUpdates)")
             if let button = statusItem?.button {
                 print("[诊断] 布局后按钮 frame=\(button.frame) 窗口=\(button.window.map { "\($0.frame)" } ?? "无")")
                 if let window = button.window {
@@ -242,7 +246,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let makeContent: (CGFloat?) -> StatusPanelContent = { limit in
             StatusPanelContent(store: self.store,
                                onQuit: { NSApp.terminate(nil) },
-                               maxHeight: limit)
+                               maxHeight: limit,
+                               automaticallyChecksForUpdates: self.autoCheckBinding,
+                               onCheckForUpdates: { self.updater.checkForUpdates() })
         }
         let contentView = NSHostingView(rootView: makeContent(nil))
         contentView.frame = NSRect(x: 0, y: 0, width: PopoverView.width, height: 100)
@@ -391,6 +397,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         menu.addItem(.separator())
 
+        let updateItem = NSMenuItem(title: String(localized: "menu.checkForUpdates",
+                                                  defaultValue: "Check for Updates…"),
+                                    action: #selector(checkForUpdates), keyEquivalent: "")
+        updateItem.target = self
+        updateItem.isEnabled = updater.canCheckForUpdates
+        menu.addItem(updateItem)
+
+        menu.addItem(.separator())
+
         let quit = NSMenuItem(title: String(localized: "menu.quit",
                                             defaultValue: "Quit DeepSeek Status"),
                               action: #selector(quit), keyEquivalent: "q")
@@ -415,6 +430,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func toggleCountdown() {
         store.showsCountdownInMenuBar.toggle()
         refreshMenuBarNow()
+    }
+
+    @objc private func checkForUpdates() {
+        updater.checkForUpdates()
+    }
+
+    /// 面板里的「自动检查更新」开关：界面只拿到一个 `Binding`，不直接依赖 Sparkle。
+    private var autoCheckBinding: Binding<Bool> {
+        Binding(get: { self.updater.automaticallyChecksForUpdates },
+                set: { self.updater.automaticallyChecksForUpdates = $0 })
     }
 
     @objc private func quit() {

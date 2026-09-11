@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Sparkle 自动更新。其余 Info.plist 键仍由 GENERATE_INFOPLIST_FILE 生成并与本文件合并。 -->
+	<key>SUFeedURL</key>
+	<string>https://github.com/owenzhao/DeepSeekStatus/releases/latest/download/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>XB2kcIar++/M5IfKWyO5e5gu4EQZPOXOXy9J68BikGQ=</string>
+	<!-- 首次启动不打扰，之后默认后台自动检查更新（用户可在面板里关闭）。 -->
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+</dict>
+</plist>
