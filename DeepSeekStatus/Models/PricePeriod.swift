@@ -13,19 +13,19 @@ enum PricePeriod: String, CaseIterable, Identifiable, Sendable {
 
     var id: String { rawValue }
 
-    /// 中文名称，例如「高峰时段」。
+    /// 显示名称，例如 "Peak hours" / 「高峰时段」。
     var title: String {
         switch self {
-        case .peak: return "高峰时段"
-        case .offPeak: return "空闲时段"
+        case .peak: return String(localized: "period.peak.title", defaultValue: "Peak hours")
+        case .offPeak: return String(localized: "period.offPeak.title", defaultValue: "Off-peak hours")
         }
     }
 
     /// 简短名称，用于空间较小的位置。
     var shortTitle: String {
         switch self {
-        case .peak: return "高峰"
-        case .offPeak: return "空闲"
+        case .peak: return String(localized: "period.peak.shortTitle", defaultValue: "Peak")
+        case .offPeak: return String(localized: "period.offPeak.shortTitle", defaultValue: "Off-peak")
         }
     }
 
@@ -40,16 +40,16 @@ enum PricePeriod: String, CaseIterable, Identifiable, Sendable {
     /// 价格文案。
     var priceText: String {
         switch self {
-        case .peak: return "高峰价（100%）"
-        case .offPeak: return "高峰价的一半（50%）"
+        case .peak: return String(localized: "period.peak.priceText", defaultValue: "Full price (100%)")
+        case .offPeak: return String(localized: "period.offPeak.priceText", defaultValue: "Half the peak price (50%)")
         }
     }
 
     /// 对应时段的说明。
     var summary: String {
         switch self {
-        case .peak: return "当前为高峰时段，按全额价格计费。"
-        case .offPeak: return "当前为空闲时段，价格是高峰时段的一半。"
+        case .peak: return String(localized: "period.peak.summary", defaultValue: "Peak hours now — billed at the full rate.")
+        case .offPeak: return String(localized: "period.offPeak.summary", defaultValue: "Off-peak hours now — priced at half the peak rate.")
         }
     }
 
@@ -70,10 +70,13 @@ enum DeepSeekPricing {
     static let peakMinuteRanges: [Range<Int>] = peakHourRanges.map { ($0.lowerBound * 60)..<($0.upperBound * 60) }
 
     /// 固定使用北京时间的日历。
+    ///
+    /// `locale` 用 `en_US_POSIX` 只是为了得到一个与用户语言无关的确定性日历
+    /// （星期/数字等的展示交给 `PricingFormatter`，它才会跟随界面语言）。
     static let calendar: Calendar = {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = timeZone
-        calendar.locale = Locale(identifier: "zh_CN")
+        calendar.locale = Locale(identifier: "en_US_POSIX")
         calendar.firstWeekday = 2 // 周一
         return calendar
     }()
@@ -168,67 +171,98 @@ struct PricingSnapshot: Equatable {
 // MARK: - 文案格式化
 
 enum PricingFormatter {
-    /// 北京时间「HH:mm」。
-    static func time(_ date: Date) -> String {
+
+    /// 界面语言对应的 Locale。
+    ///
+    /// 跟随 App 实际选中的本地化（而不是 `Locale.current`），这样单独给 App 指定语言时，
+    /// 日期、星期的写法也会跟着界面语言走。
+    static var displayLocale: Locale {
+        guard let identifier = Bundle.main.preferredLocalizations.first else {
+            return Locale.current
+        }
+        return Locale(identifier: identifier)
+    }
+
+    /// 以北京时间渲染、格式固定的文本。
+    private static func string(from date: Date, format: String) -> String {
         let formatter = DateFormatter()
+        formatter.locale = displayLocale
         formatter.calendar = DeepSeekPricing.calendar
         formatter.timeZone = DeepSeekPricing.timeZone
-        formatter.locale = Locale(identifier: "zh_CN")
-        formatter.dateFormat = "HH:mm"
+        formatter.dateFormat = format
         return formatter.string(from: date)
+    }
+
+    /// 以北京时间渲染、但日期顺序跟随界面语言的文本（例如 "Sep 14" / 「9月14日」）。
+    private static func string(from date: Date, template: String) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = displayLocale
+        formatter.calendar = DeepSeekPricing.calendar
+        formatter.timeZone = DeepSeekPricing.timeZone
+        formatter.setLocalizedDateFormatFromTemplate(template)
+        return formatter.string(from: date)
+    }
+
+    /// 北京时间「HH:mm」。
+    ///
+    /// 刻意固定为 24 小时制：界面里所有时段（09:00、14:00 …）都按 24 小时表达，
+    /// 不受系统「使用 24 小时制」开关影响。
+    static func time(_ date: Date) -> String {
+        string(from: date, format: "HH:mm")
     }
 
     /// 北京时间「HH:mm:ss」。
     static func preciseTime(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.calendar = DeepSeekPricing.calendar
-        formatter.timeZone = DeepSeekPricing.timeZone
-        formatter.locale = Locale(identifier: "zh_CN")
-        formatter.dateFormat = "HH:mm:ss"
-        return formatter.string(from: date)
+        string(from: date, format: "HH:mm:ss")
     }
 
-    /// 北京时间日期「M月d日 EEEE」。
+    /// 北京时间的日期，例如 "Monday, September 14" / 「9月14日星期一」。
     static func day(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.calendar = DeepSeekPricing.calendar
-        formatter.timeZone = DeepSeekPricing.timeZone
-        formatter.locale = Locale(identifier: "zh_CN")
-        formatter.dateFormat = "M月d日 EEEE"
-        return formatter.string(from: date)
+        string(from: date, template: "EEEEMMMMd")
     }
 
-    /// 把切换时刻描述成「今天 14:00」「明天 09:00」「周一 09:00」。
+    /// 把切换时刻描述成「today 14:00」「tomorrow 09:00」「Mon 09:00」。
     static func transitionDescription(_ date: Date, relativeTo now: Date) -> String {
         let calendar = DeepSeekPricing.calendar
         let dayDelta = calendar.dateComponents([.day], from: calendar.startOfDay(for: now), to: calendar.startOfDay(for: date)).day ?? 0
         let timeText = time(date)
         switch dayDelta {
-        case ..<0: return "\(timeText)"
-        case 0: return "今天 \(timeText)"
-        case 1: return "明天 \(timeText)"
-        case 2: return "后天 \(timeText)"
+        case ..<0:
+            return timeText
+        case 0:
+            return String(format: String(localized: "transition.today", defaultValue: "today %@"), timeText)
+        case 1:
+            return String(format: String(localized: "transition.tomorrow", defaultValue: "tomorrow %@"), timeText)
+        case 2:
+            return String(format: String(localized: "transition.dayAfterTomorrow",
+                                        defaultValue: "the day after tomorrow at %@"), timeText)
         default:
-            let weekday = weekdayName(of: date)
-            if dayDelta < 7 { return "\(weekday) \(timeText)" }
-            let formatter = DateFormatter()
-            formatter.calendar = calendar
-            formatter.timeZone = DeepSeekPricing.timeZone
-            formatter.locale = Locale(identifier: "zh_CN")
-            formatter.dateFormat = "M月d日 HH:mm"
-            return formatter.string(from: date)
+            if dayDelta < 7 {
+                return String(format: String(localized: "transition.weekday", defaultValue: "%1$@ %2$@"),
+                              weekdayName(of: date), timeText)
+            }
+            return string(from: date, template: "MMMdHHmm")
         }
     }
 
-    /// 中文星期简称。
+    /// 界面语言下的星期简称，例如 "Mon" / 「周一」。
     static func weekdayName(of date: Date) -> String {
-        let names = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"]
-        let weekday = DeepSeekPricing.calendar.component(.weekday, from: date)
-        let index = min(max(weekday - 1, 0), 6)
-        return names[index]
+        string(from: date, template: "EEE")
     }
 
-    /// 把秒数格式化成「1 小时 23 分」「23 分 05 秒」这类可读文案。
+    /// 周一到周日的星期简称，供一周时段表当作行标题（顺序固定为周一 → 周日）。
+    static let weekdaySymbolsMondayFirst: [String] = {
+        let formatter = DateFormatter()
+        formatter.locale = displayLocale
+        formatter.calendar = DeepSeekPricing.calendar
+        formatter.timeZone = DeepSeekPricing.timeZone
+        formatter.setLocalizedDateFormatFromTemplate("EEE")
+        let symbols = formatter.shortWeekdaySymbols ?? ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+        // `shortWeekdaySymbols` 的第 0 项是周日，这里重排成周一开头。
+        return (1...7).map { symbols[$0 % 7] }
+    }()
+
+    /// 把秒数格式化成「1 hour 23 min」「23 min 05 sec」这类可读文案。
     static func duration(_ seconds: TimeInterval) -> String {
         let total = Int(seconds.rounded(.down))
         let days = total / 86_400
@@ -237,15 +271,44 @@ enum PricingFormatter {
         let secs = total % 60
 
         if days > 0 {
-            return hours > 0 ? "\(days) 天 \(hours) 小时" : "\(days) 天"
+            return hours > 0 ? "\(dayUnit(days)) \(hourUnit(hours))" : dayUnit(days)
         }
         if hours > 0 {
-            return minutes > 0 ? "\(hours) 小时 \(minutes) 分" : "\(hours) 小时"
+            return minutes > 0 ? "\(hourUnit(hours)) \(minuteUnit(minutes))" : hourUnit(hours)
         }
         if minutes > 0 {
-            return String(format: "%d 分 %02d 秒", minutes, secs)
+            return "\(minuteUnit(minutes)) \(secondUnit(secs))"
         }
-        return "\(secs) 秒"
+        return secondUnit(secs)
+    }
+
+    /// 英文有单复数变化、中文没有，所以单数单独给一条文案（里面直接写死 "1"）。
+    private static func counted(_ value: Int, one: String, other: String) -> String {
+        value == 1 ? one : String(format: other, value)
+    }
+
+    private static func dayUnit(_ value: Int) -> String {
+        counted(value,
+                one: String(localized: "duration.day.one", defaultValue: "1 day"),
+                other: String(localized: "duration.day.other", defaultValue: "%lld days"))
+    }
+
+    private static func hourUnit(_ value: Int) -> String {
+        counted(value,
+                one: String(localized: "duration.hour.one", defaultValue: "1 hour"),
+                other: String(localized: "duration.hour.other", defaultValue: "%lld hours"))
+    }
+
+    private static func minuteUnit(_ value: Int) -> String {
+        counted(value,
+                one: String(localized: "duration.minute.one", defaultValue: "1 min"),
+                other: String(localized: "duration.minute.other", defaultValue: "%lld min"))
+    }
+
+    private static func secondUnit(_ value: Int) -> String {
+        counted(value,
+                one: String(localized: "duration.second.one", defaultValue: "1 sec"),
+                other: String(localized: "duration.second.other", defaultValue: "%lld sec"))
     }
 
     /// 菜单栏倒计时文案，固定为 `HH:MM:SS`（最长的一段空闲时段也只有 63 小时），

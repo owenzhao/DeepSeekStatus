@@ -6,10 +6,11 @@ import SwiftUI
 struct WeekScheduleGrid: View {
     var now: Date
 
-    private let rowLabels = ["一", "二", "三", "四", "五", "六", "日"]
+    /// 行标题：周一 → 周日，跟随界面语言（"Mon" / 「周一」）。
+    private var rowLabels: [String] { PricingFormatter.weekdaySymbolsMondayFirst }
     private let cellHeight: CGFloat = 7.5
     private let gap: CGFloat = 1.5
-    private let labelWidth: CGFloat = 20
+    private let labelWidth: CGFloat = 26
     private let tickHeight: CGFloat = 9
 
     var body: some View {
@@ -20,8 +21,10 @@ struct WeekScheduleGrid: View {
             .frame(height: contentHeight)
 
             HStack(spacing: 14) {
-                legendItem(color: WhaleTheme.brandBlue, title: "高峰 · 全价")
-                legendItem(color: Color.secondary.opacity(0.22), title: "空闲 · 半价")
+                legendItem(color: WhaleTheme.brandBlue,
+                           title: String(localized: "schedule.legend.peak", defaultValue: "Peak · Full price"))
+                legendItem(color: Color.secondary.opacity(0.22),
+                           title: String(localized: "schedule.legend.offPeak", defaultValue: "Off-peak · Half price"))
                 Spacer()
             }
             .font(.system(size: 10))

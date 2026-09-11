@@ -101,7 +101,7 @@ Or just open `DeepSeekStatus.xcodeproj` in Xcode, select the `DeepSeekStatus` sc
 
 ### Prebuilt app
 
-1. Download **[`DeepSeekStatus-1.0.zip`](https://github.com/owenzhao/DeepSeekStatus/releases/latest/download/DeepSeekStatus-1.0.zip)**
+1. Download **[`DeepSeekStatus-1.0.1.zip`](https://github.com/owenzhao/DeepSeekStatus/releases/latest/download/DeepSeekStatus-1.0.1.zip)**
    (or pick another version from the [Releases page](https://github.com/owenzhao/DeepSeekStatus/releases)).
    The binary is universal — Apple Silicon and Intel — and needs macOS 14.0 or later.
 2. Unzip it and drag `DeepSeekStatus.app` into `/Applications`.
@@ -171,9 +171,11 @@ The menu bar is translucent, so its backdrop depends on the wallpaper. A single 
 enough contrast on both, so the app picks the palette per appearance: light blue on a dark menu bar,
 brand blue on a light one.
 
-**The UI is in Chinese.**
-Yes — the schedule is defined in Beijing time and that is the primary audience. Localization pull
-requests are welcome.
+**Which languages does the UI support?**
+English (the default) and Simplified Chinese. The interface follows the language chosen for the app in
+**System Settings → General → Language & Region → Applications**; the pricing schedule itself is always
+computed in Beijing time. All UI strings live in a single String Catalog
+(`DeepSeekStatus/Localizable.xcstrings`), so adding another language is just another column there.
 
 **Does the countdown update while the Mac is asleep?**
 The app recomputes on wake, on system clock changes, and at midnight, so it is correct as soon as

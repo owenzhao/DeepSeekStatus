@@ -1,0 +1,817 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "aquarium.beijingTime" : {
+      "comment" : "Label in the top-right corner of the aquarium.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beijing time"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "北京时间"
+          }
+        }
+      }
+    },
+    "duration.day.one" : {
+      "comment" : "Countdown duration, exactly one day.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 day"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 天"
+          }
+        }
+      }
+    },
+    "duration.day.other" : {
+      "comment" : "Countdown duration, N days.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld days"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 天"
+          }
+        }
+      }
+    },
+    "duration.hour.one" : {
+      "comment" : "Countdown duration, exactly one hour.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 hour"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 小时"
+          }
+        }
+      }
+    },
+    "duration.hour.other" : {
+      "comment" : "Countdown duration, N hours.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld hours"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 小时"
+          }
+        }
+      }
+    },
+    "duration.minute.one" : {
+      "comment" : "Countdown duration, exactly one minute.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 min"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 分"
+          }
+        }
+      }
+    },
+    "duration.minute.other" : {
+      "comment" : "Countdown duration, N minutes.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld min"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 分"
+          }
+        }
+      }
+    },
+    "duration.second.one" : {
+      "comment" : "Countdown duration, exactly one second.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 sec"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 秒"
+          }
+        }
+      }
+    },
+    "duration.second.other" : {
+      "comment" : "Countdown duration, N seconds.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld sec"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 秒"
+          }
+        }
+      }
+    },
+    "launchAtLogin.failed" : {
+      "comment" : "Shown when registering the login item fails. %@ is the system error description.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn’t change the setting: %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "设置失败：%@"
+          }
+        }
+      }
+    },
+    "launchAtLogin.needsApproval" : {
+      "comment" : "Shown when the login item needs approval in System Settings.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allow it in System Settings › General › Login Items."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "需要在「系统设置 › 通用 › 登录项」中允许。"
+          }
+        }
+      }
+    },
+    "menu.preview.live" : {
+      "comment" : "Status item context menu: follow the real clock.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Follow current time"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "跟随当前时间"
+          }
+        }
+      }
+    },
+    "menu.preview.offPeak" : {
+      "comment" : "Status item context menu: preview the off-peak look.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preview: Off-peak hours"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "预览：空闲时段"
+          }
+        }
+      }
+    },
+    "menu.preview.peak" : {
+      "comment" : "Status item context menu: preview the peak look.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preview: Peak hours"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "预览：高峰时段"
+          }
+        }
+      }
+    },
+    "menu.quit" : {
+      "comment" : "Status item context menu: quit the app.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quit DeepSeek Status"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "退出 DeepSeek Status"
+          }
+        }
+      }
+    },
+    "menu.showCountdown" : {
+      "comment" : "Status item context menu: toggle the menu bar countdown.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show countdown in menu bar"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在菜单栏显示倒计时"
+          }
+        }
+      }
+    },
+    "period.offPeak.priceText" : {
+      "comment" : "Off-peak price relative to the peak price.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Half the peak price (50%)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "高峰价的一半（50%）"
+          }
+        }
+      }
+    },
+    "period.offPeak.shortTitle" : {
+      "comment" : "Short off-peak name for tight spaces.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Off-peak"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "空闲"
+          }
+        }
+      }
+    },
+    "period.offPeak.summary" : {
+      "comment" : "One-line explanation of the off-peak period.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Off-peak hours now — priced at half the peak rate."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当前为空闲时段，价格是高峰时段的一半。"
+          }
+        }
+      }
+    },
+    "period.offPeak.title" : {
+      "comment" : "Full off-peak period name.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Off-peak hours"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "空闲时段"
+          }
+        }
+      }
+    },
+    "period.peak.priceText" : {
+      "comment" : "Peak price relative to the peak price.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Full price (100%)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "高峰价（100%）"
+          }
+        }
+      }
+    },
+    "period.peak.shortTitle" : {
+      "comment" : "Short peak name for tight spaces.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peak"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "高峰"
+          }
+        }
+      }
+    },
+    "period.peak.summary" : {
+      "comment" : "One-line explanation of the peak period.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peak hours now — billed at the full rate."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当前为高峰时段，按全额价格计费。"
+          }
+        }
+      }
+    },
+    "period.peak.title" : {
+      "comment" : "Full peak period name.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peak hours"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "高峰时段"
+          }
+        }
+      }
+    },
+    "popover.countdown.detail" : {
+      "comment" : "When the next period starts. %1$@ is the localized transition time (e.g. “tomorrow 09:00”), %2$@ is the period name.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Switches to %2$@ %1$@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ 起转为%2$@"
+          }
+        }
+      }
+    },
+    "popover.countdown.title" : {
+      "comment" : "Countdown row title. %@ is the name of the next period.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Time until “%@”"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "距离「%@」还有"
+          }
+        }
+      }
+    },
+    "popover.currentRate" : {
+      "comment" : "Label above the current unit price.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Current rate"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当前单价"
+          }
+        }
+      }
+    },
+    "popover.footnote.beijing" : {
+      "comment" : "Footnote explaining that every time is Beijing time.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All times are Beijing time (UTC+8)."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所有时间均为北京时间（UTC+8）。"
+          }
+        }
+      }
+    },
+    "popover.footnote.localZone" : {
+      "comment" : "Appended to the Beijing-time footnote when the Mac is in another time zone. %@ is the time zone identifier.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " Your local time zone is %@."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你本机时区为 %@。"
+          }
+        }
+      }
+    },
+    "popover.option.countdown" : {
+      "comment" : "Toggle: show the countdown in the menu bar.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show countdown in menu bar"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在菜单栏显示倒计时"
+          }
+        }
+      }
+    },
+    "popover.option.launchAtLogin" : {
+      "comment" : "Toggle: launch the app at login.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Launch at login"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "开机自动启动"
+          }
+        }
+      }
+    },
+    "popover.preview.auto" : {
+      "comment" : "Preview picker: follow the real clock.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auto"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自动"
+          }
+        }
+      }
+    },
+    "popover.preview.banner" : {
+      "comment" : "Banner shown while previewing a period. %@ is the period name.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Previewing: showing “%@”"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "预览中：正在显示「%@」的样子"
+          }
+        }
+      }
+    },
+    "popover.preview.label" : {
+      "comment" : "Label in front of the preview picker.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preview"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "预览"
+          }
+        }
+      }
+    },
+    "popover.preview.resume" : {
+      "comment" : "Button that leaves preview mode.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resume live"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "恢复实时"
+          }
+        }
+      }
+    },
+    "popover.quit" : {
+      "comment" : "Footer button that quits the app.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quit"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "退出"
+          }
+        }
+      }
+    },
+    "popover.schedule.offPeak.detail" : {
+      "comment" : "Off-peak rule description.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All other times (including weekends)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "其余时间（含周末全天）"
+          }
+        }
+      }
+    },
+    "popover.schedule.peak.detail" : {
+      "comment" : "Peak rule description. Shared by the panel and the weekly grid.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mon–Fri 09:00 – 12:00, 14:00 – 18:00"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "周一至周五 09:00 – 12:00、14:00 – 18:00"
+          }
+        }
+      }
+    },
+    "popover.schedule.title" : {
+      "comment" : "Heading of the schedule rules block.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schedule rules"
+          }
+        }
+        ,
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "时段规则"
+          }
+        }
+      }
+    },
+    "schedule.legend.offPeak" : {
+      "comment" : "Weekly grid legend: off-peak cells.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Off-peak · Half price"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "空闲 · 半价"
+          }
+        }
+      }
+    },
+    "schedule.legend.peak" : {
+      "comment" : "Weekly grid legend: peak cells.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peak · Full price"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "高峰 · 全价"
+          }
+        }
+      }
+    },
+    "transition.dayAfterTomorrow" : {
+      "comment" : "Transition happens the day after tomorrow. %@ is a time such as “09:00”.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "the day after tomorrow at %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "后天 %@"
+          }
+        }
+      }
+    },
+    "transition.today" : {
+      "comment" : "Transition happens today. %@ is a time such as “14:00”.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "today %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今天 %@"
+          }
+        }
+      }
+    },
+    "transition.tomorrow" : {
+      "comment" : "Transition happens tomorrow. %@ is a time such as “09:00”.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "tomorrow %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "明天 %@"
+          }
+        }
+      }
+    },
+    "transition.weekday" : {
+      "comment" : "Transition within the coming week. %1$@ is the weekday, %2$@ is the time.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

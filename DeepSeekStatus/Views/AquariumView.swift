@@ -43,7 +43,7 @@ struct AquariumView: View {
         VStack {
             HStack(alignment: .top) {
                 Spacer()
-                Text("北京时间")
+                Text(String(localized: "aquarium.beijingTime", defaultValue: "Beijing time"))
                     .font(.system(size: 10, weight: .medium))
                     .foregroundStyle(.white.opacity(0.55))
             }

@@ -359,31 +359,41 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         hidePanel()
         let menu = NSMenu()
 
-        let peak = NSMenuItem(title: "预览：高峰时段", action: #selector(previewPeak), keyEquivalent: "")
+        let peak = NSMenuItem(title: String(localized: "menu.preview.peak",
+                                            defaultValue: "Preview: Peak hours"),
+                              action: #selector(previewPeak), keyEquivalent: "")
         peak.target = self
         peak.state = store.previewPeriod == .peak ? .on : .off
         menu.addItem(peak)
 
-        let offPeak = NSMenuItem(title: "预览：空闲时段", action: #selector(previewOffPeak), keyEquivalent: "")
+        let offPeak = NSMenuItem(title: String(localized: "menu.preview.offPeak",
+                                               defaultValue: "Preview: Off-peak hours"),
+                                 action: #selector(previewOffPeak), keyEquivalent: "")
         offPeak.target = self
         offPeak.state = store.previewPeriod == .offPeak ? .on : .off
         menu.addItem(offPeak)
 
-        let live = NSMenuItem(title: "跟随当前时间", action: #selector(previewLive), keyEquivalent: "")
+        let live = NSMenuItem(title: String(localized: "menu.preview.live",
+                                            defaultValue: "Follow current time"),
+                              action: #selector(previewLive), keyEquivalent: "")
         live.target = self
         live.state = store.previewPeriod == nil ? .on : .off
         menu.addItem(live)
 
         menu.addItem(.separator())
 
-        let countdown = NSMenuItem(title: "在菜单栏显示倒计时", action: #selector(toggleCountdown), keyEquivalent: "")
+        let countdown = NSMenuItem(title: String(localized: "menu.showCountdown",
+                                                 defaultValue: "Show countdown in menu bar"),
+                                   action: #selector(toggleCountdown), keyEquivalent: "")
         countdown.target = self
         countdown.state = store.showsCountdownInMenuBar ? .on : .off
         menu.addItem(countdown)
 
         menu.addItem(.separator())
 
-        let quit = NSMenuItem(title: "退出 DeepSeek Status", action: #selector(quit), keyEquivalent: "q")
+        let quit = NSMenuItem(title: String(localized: "menu.quit",
+                                            defaultValue: "Quit DeepSeek Status"),
+                              action: #selector(quit), keyEquivalent: "q")
         quit.target = self
         menu.addItem(quit)
 

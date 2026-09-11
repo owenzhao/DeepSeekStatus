@@ -112,9 +112,14 @@ final class PricingStore: ObservableObject {
     private func applyLaunchAtLogin() {
         do {
             try LaunchAtLogin.set(enabled: launchAtLogin)
-            launchAtLoginMessage = LaunchAtLogin.needsApproval ? "需要在「系统设置 › 通用 › 登录项」中允许。" : nil
+            launchAtLoginMessage = LaunchAtLogin.needsApproval
+                ? String(localized: "launchAtLogin.needsApproval",
+                         defaultValue: "Allow it in System Settings › General › Login Items.")
+                : nil
         } catch {
-            launchAtLoginMessage = "设置失败：\(error.localizedDescription)"
+            launchAtLoginMessage = String(format: String(localized: "launchAtLogin.failed",
+                                                         defaultValue: "Couldn’t change the setting: %@"),
+                                          error.localizedDescription)
             // 回滚开关状态。
             let actual = LaunchAtLogin.isEnabled
             if actual != launchAtLogin {

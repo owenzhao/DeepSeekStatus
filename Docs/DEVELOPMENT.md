@@ -17,6 +17,7 @@ DeepSeekStatus/
 │                                      #   xcodebuild -scheme works)
 ├── DeepSeekStatus/
 │   ├── DeepSeekStatusApp.swift        # Entry point: AppDelegate + NSStatusItem + panel placement
+│   ├── Localizable.xcstrings          # String Catalog: English (source) + Simplified Chinese
 │   ├── Models/
 │   │   ├── PricePeriod.swift          # Schedule rules, next transition, formatting
 │   │   └── PricingStore.swift         # 1 Hz state source + user defaults
@@ -97,7 +98,7 @@ the preview banner is visible).
 
 `Models/PricePeriod.swift`:
 
-- `PricePeriod` — `.peak` / `.offPeak`, with `priceMultiplier` (1.0 / 0.5) and the display strings.
+- `PricePeriod` — `.peak` / `.offPeak`, with `priceMultiplier` (1.0 / 0.5) and the (localized) display strings.
 - `DeepSeekPricing` — a fixed `Asia/Shanghai` calendar, `peakHourRanges = [9..<12, 14..<18]`,
   `period(at:)`, `nextTransition(after:)`, `currentIntervalStart(before:)`.
 - Ranges are half-open: 09:00 is peak, 12:00 is off-peak, 14:00 is peak, 18:00 is off-peak.
@@ -156,6 +157,25 @@ mid-saturation blues blend into the backdrop, so contrast has to come from light
 `Support/LaunchAtLogin.swift` wraps `SMAppService.mainApp` (`register()` / `unregister()` /
 `status`). The toggle surfaces an error message in the panel when registration fails
 (e.g. when the app is run from a build directory rather than `/Applications`).
+
+### 2.7 Localization
+
+The base (development) language is **English**; **Simplified Chinese** ships as a translation. The
+project's `knownRegions` already lists `en`, `zh-Hans` and `Base`, and `CFBundleDevelopmentRegion`
+is `en`.
+
+- All UI strings live in `DeepSeekStatus/Localizable.xcstrings` (a String Catalog, compiled into
+  `en.lproj` and `zh-Hans.lproj`). Being under the file-system-synchronized group, it needs no
+  `project.pbxproj` edit.
+- Call sites use explicit semantic keys, e.g.
+  `String(localized: "period.peak.title", defaultValue: "Peak hours")`.
+- Dynamic strings keep explicit placeholders and are composed with `String(format:)`, e.g.
+  `popover.countdown.detail` = `"Switches to %2$@ %1$@"` / `"%1$@ 起转为%2$@"`.
+- English plurals use separate `.one` / `.other` keys chosen in `PricingFormatter` (`1 day` vs `%lld days`).
+- Dates and weekdays follow the UI language via `PricingFormatter.displayLocale`, so `Mon` / 「周一」
+  match the interface; times stay 24-hour `HH:mm` on purpose.
+- Known limitation: the `[诊断]` logging behind `DEEPSEEK_STATUS_DIAGNOSTICS=1` is developer-facing and
+  still uses hard-coded Chinese labels.
 
 ---
 
@@ -276,9 +296,9 @@ both sides, the Friday-evening-to-Monday-morning span, and time-zone independenc
 (`America/Los_Angeles`, `Europe/London`, `Asia/Tokyo`, `UTC`). All of them pass, e.g.:
 
 ```
-✅ 周一 08:59 → 空闲时段，下次切换 今天 09:00（转为高峰时段）
+✅ 周一 08:59 → Off-peak hours，下次切换 today 09:00（转为Peak hours）
 ...
-✅ 时区无关性：周一 10:30 北京时间 = 高峰时段（与本地时区无关）
+✅ 时区无关性：周一 10:30 北京时间 = Peak hours（与本地时区无关）
 全部通过 ✅
 ```
 

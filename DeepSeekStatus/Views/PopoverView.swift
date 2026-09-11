@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 /// 菜单栏图标的弹窗面板。
@@ -37,11 +38,15 @@ struct PopoverView: View {
     private var previewBanner: some View {
         HStack(spacing: 6) {
             Image(systemName: "eye")
-            Text("预览中：正在显示「\(period.title)」的样子")
+            Text(String(format: String(localized: "popover.preview.banner",
+                                      defaultValue: "Previewing: showing “%@”"),
+                        period.title))
             Spacer(minLength: 0)
-            Button("恢复实时") { store.previewPeriod = nil }
-                .buttonStyle(.link)
-                .font(.system(size: 10.5, weight: .semibold))
+            Button(String(localized: "popover.preview.resume", defaultValue: "Resume live")) {
+                store.previewPeriod = nil
+            }
+            .buttonStyle(.link)
+            .font(.system(size: 10.5, weight: .semibold))
         }
         .font(.system(size: 10.5))
         .padding(.horizontal, 16)
@@ -71,7 +76,7 @@ struct PopoverView: View {
     private var priceSection: some View {
         VStack(alignment: .leading, spacing: 5) {
             HStack {
-                Text("当前单价")
+                Text(String(localized: "popover.currentRate", defaultValue: "Current rate"))
                     .font(.system(size: 11.5, weight: .medium))
                 Spacer()
                 Text(period.priceText)
@@ -98,14 +103,19 @@ struct PopoverView: View {
                 Image(systemName: "clock")
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
-                Text("距离「\(snapshot.nextPeriod.title)」还有")
+                Text(String(format: String(localized: "popover.countdown.title",
+                                          defaultValue: "Time until “%@”"),
+                            snapshot.nextPeriod.title))
                     .font(.system(size: 11.5, weight: .medium))
                 Spacer()
                 Text(PricingFormatter.duration(snapshot.secondsUntilTransition))
                     .font(.system(size: 12.5, weight: .bold, design: .rounded))
                     .monospacedDigit()
             }
-            Text("\(PricingFormatter.transitionDescription(snapshot.nextTransition, relativeTo: snapshot.now)) 起转为\(snapshot.nextPeriod.title)")
+            Text(String(format: String(localized: "popover.countdown.detail",
+                                      defaultValue: "Switches to %2$@ %1$@"),
+                        PricingFormatter.transitionDescription(snapshot.nextTransition, relativeTo: snapshot.now),
+                        snapshot.nextPeriod.title))
                 .font(.system(size: 10.5))
                 .foregroundStyle(.secondary)
             // 当前时段的进度：自定义细条比 ProgressView 更紧凑。
@@ -125,16 +135,18 @@ struct PopoverView: View {
 
     private var scheduleSection: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("时段规则")
+            Text(String(localized: "popover.schedule.title", defaultValue: "Schedule rules"))
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(.secondary)
 
             ruleRow(color: WhaleTheme.brandBlue,
-                    title: "高峰",
-                    detail: "周一至周五 09:00 – 12:00、14:00 – 18:00")
+                    title: PricePeriod.peak.shortTitle,
+                    detail: String(localized: "popover.schedule.peak.detail",
+                                   defaultValue: "Mon–Fri 09:00 – 12:00, 14:00 – 18:00"))
             ruleRow(color: Color.secondary.opacity(0.35),
-                    title: "空闲",
-                    detail: "其余时间（含周末全天）")
+                    title: PricePeriod.offPeak.shortTitle,
+                    detail: String(localized: "popover.schedule.offPeak.detail",
+                                   defaultValue: "All other times (including weekends)"))
 
             WeekScheduleGrid(now: snapshot.now)
 
@@ -145,6 +157,18 @@ struct PopoverView: View {
         }
     }
 
+    /// 规则标签列的宽度。
+    ///
+    /// 标签随语言变化（英文 "Off-peak" 比中文「空闲」宽得多），固定一个宽度会在某一种语言下
+    /// 要么换行、要么把右侧说明挤到换行，所以这里按当前语言实测最宽的那个标签取列宽。
+    private static let ruleLabelWidth: CGFloat = {
+        let font = NSFont.systemFont(ofSize: 11, weight: .semibold)
+        let widest = [PricePeriod.peak.shortTitle, PricePeriod.offPeak.shortTitle]
+            .map { ($0 as NSString).size(withAttributes: [.font: font]).width }
+            .max() ?? 26
+        return ceil(widest) + 4
+    }()
+
     private func ruleRow(color: Color, title: String, detail: String) -> some View {
         HStack(alignment: .top, spacing: 7) {
             RoundedRectangle(cornerRadius: 2, style: .continuous)
@@ -153,7 +177,8 @@ struct PopoverView: View {
                 .padding(.top, 2)
             Text(title)
                 .font(.system(size: 11, weight: .semibold))
-                .frame(width: 26, alignment: .leading)
+                .fixedSize(horizontal: true, vertical: false)
+                .frame(width: Self.ruleLabelWidth, alignment: .leading)
             Text(detail)
                 .font(.system(size: 11))
                 .foregroundStyle(.secondary)
@@ -163,23 +188,29 @@ struct PopoverView: View {
     }
 
     private var footnote: String {
-        let beijing = "所有时间均为北京时间（UTC+8）。"
+        let beijing = String(localized: "popover.footnote.beijing",
+                             defaultValue: "All times are Beijing time (UTC+8).")
         let localOffset = TimeZone.current.secondsFromGMT()
         guard localOffset != DeepSeekPricing.timeZone.secondsFromGMT() else { return beijing }
-        return beijing + "你本机时区为 \(TimeZone.current.identifier)。"
+        // 英文的这句带前导空格（接在上一句后面），中文不带；所以空格写进译文里。
+        return beijing + String(format: String(localized: "popover.footnote.localZone",
+                                              defaultValue: " Your local time zone is %@."),
+                                TimeZone.current.identifier)
     }
 
     // MARK: - 选项
 
     private var optionsSection: some View {
         VStack(alignment: .leading, spacing: 9) {
-            Toggle("在菜单栏显示倒计时", isOn: $store.showsCountdownInMenuBar)
+            Toggle(String(localized: "popover.option.countdown", defaultValue: "Show countdown in menu bar"),
+                   isOn: $store.showsCountdownInMenuBar)
                 .toggleStyle(.switch)
                 .controlSize(.mini)
                 .font(.system(size: 11.5))
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            Toggle("开机自动启动", isOn: $store.launchAtLogin)
+            Toggle(String(localized: "popover.option.launchAtLogin", defaultValue: "Launch at login"),
+                   isOn: $store.launchAtLogin)
                 .toggleStyle(.switch)
                 .controlSize(.mini)
                 .font(.system(size: 11.5))
@@ -194,13 +225,15 @@ struct PopoverView: View {
             }
 
             HStack {
-                Text("预览")
+                Text(String(localized: "popover.preview.label", defaultValue: "Preview"))
                     .font(.system(size: 11.5))
                 Spacer()
-                Picker("预览", selection: $store.previewPeriod) {
-                    Text("自动").tag(nil as PricePeriod?)
-                    Text("高峰").tag(PricePeriod.peak as PricePeriod?)
-                    Text("空闲").tag(PricePeriod.offPeak as PricePeriod?)
+                Picker(String(localized: "popover.preview.label", defaultValue: "Preview"),
+                       selection: $store.previewPeriod) {
+                    Text(String(localized: "popover.preview.auto", defaultValue: "Auto"))
+                        .tag(nil as PricePeriod?)
+                    Text(PricePeriod.peak.shortTitle).tag(PricePeriod.peak as PricePeriod?)
+                    Text(PricePeriod.offPeak.shortTitle).tag(PricePeriod.offPeak as PricePeriod?)
                 }
                 .pickerStyle(.segmented)
                 .labelsHidden()
@@ -212,13 +245,20 @@ struct PopoverView: View {
 
     // MARK: - 页脚
 
+    /// 「DeepSeek Status <版本号>」。版本号直接读 bundle（`MARKETING_VERSION`），
+    /// 避免升级版本后页脚忘记同步。名字不翻译。
+    private static let versionText: String = {
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.1"
+        return "DeepSeek Status \(version)"
+    }()
+
     private var footerSection: some View {
         HStack(alignment: .center, spacing: 8) {
-            Text("DeepSeek Status 1.0")
+            Text(Self.versionText)
                 .font(.system(size: 9.5))
                 .foregroundStyle(.tertiary)
             Spacer()
-            Button("退出") { onQuit() }
+            Button(String(localized: "popover.quit", defaultValue: "Quit")) { onQuit() }
                 .buttonStyle(.link)
                 .font(.system(size: 11, weight: .medium))
         }
