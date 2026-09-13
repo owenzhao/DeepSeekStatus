@@ -201,10 +201,21 @@ func renderPreviewSet() {
     for period in PricePeriod.allCases {
         let store = PricingStore(now: now)
         store.previewPeriod = period
-        renderNatural(PopoverView(store: store, onQuit: {})
+        renderNatural(PopoverView(store: store, onQuit: {}, balance: .preview())
                         .background(Color(nsColor: .windowBackgroundColor)),
                       width: 320, scale: 2,
                       name: "popover-\(period.rawValue)")
+    }
+
+    // 7b. 余额区块的另外两种状态：还没填 Key、以及 Key 失效
+    for (name, balance) in [("popover-no-key", BalanceStore.preview(state: .noKey, hasKey: false, lastRefreshed: nil)),
+                            ("popover-key-invalid", BalanceStore.preview(state: .failed(.unauthorized)))] {
+        let store = PricingStore(now: now)
+        store.previewPeriod = .peak
+        renderNatural(PopoverView(store: store, onQuit: {}, balance: balance)
+                        .background(Color(nsColor: .windowBackgroundColor)),
+                      width: 320, scale: 2,
+                      name: name)
     }
 
     // 8. 鲸鱼矢量本身（和官方标志对比用）
@@ -317,7 +328,7 @@ func measure() {
     for period in PricePeriod.allCases {
         let store = PricingStore(now: now)
         store.previewPeriod = period
-        let hosting = NSHostingView(rootView: PopoverView(store: store, onQuit: {}))
+        let hosting = NSHostingView(rootView: PopoverView(store: store, onQuit: {}, balance: .preview()))
         print("弹窗 \(period.title): \(hosting.fittingSize)")
     }
     let aquarium = NSHostingView(rootView: AquariumView(period: .peak, now: now))

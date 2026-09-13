@@ -18,6 +18,414 @@
         }
       }
     },
+    "balance.empty" : {
+      "comment" : "Balance: the API returned no balance entries.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No balance information."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暂无余额信息。"
+          }
+        }
+      }
+    },
+    "balance.enterKey" : {
+      "comment" : "Button shown instead of Refresh when no API key is saved.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter API Key"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "输入 API Key"
+          }
+        }
+      }
+    },
+    "balance.error.decoding" : {
+      "comment" : "Balance refresh failed: the response could not be parsed.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DeepSeek returned an unexpected response."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DeepSeek 返回了无法解析的数据。"
+          }
+        }
+      }
+    },
+    "balance.error.network" : {
+      "comment" : "Balance refresh failed: could not reach the server. %@ is the underlying reason.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn’t reach DeepSeek: %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法连接 DeepSeek：%@"
+          }
+        }
+      }
+    },
+    "balance.error.server" : {
+      "comment" : "Balance refresh failed with an HTTP error. %lld is the status code.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DeepSeek returned an error (HTTP %lld)."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DeepSeek 返回错误（HTTP %lld）。"
+          }
+        }
+      }
+    },
+    "balance.error.unauthorized" : {
+      "comment" : "Balance refresh failed because the API key is invalid. Phrased as a question so the user can replace the key.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The API key is invalid or expired. Replace it?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "API Key 无效或已过期，是否更换？"
+          }
+        }
+      }
+    },
+    "balance.granted" : {
+      "comment" : "Balance breakdown: granted (promotional) balance. %@ is an amount such as ¥10.00.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Granted %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "赠送 %@"
+          }
+        }
+      }
+    },
+    "balance.key.cancel" : {
+      "comment" : "API key editor: discard the edit.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取消"
+          }
+        }
+      }
+    },
+    "balance.key.change" : {
+      "comment" : "Button that opens the API key editor to replace the saved key.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Change API Key"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更换 API Key"
+          }
+        }
+      }
+    },
+    "balance.key.changeHelp" : {
+      "comment" : "Tooltip of the small key button in the balance header.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Change the saved API key"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更换已保存的 API Key"
+          }
+        }
+      }
+    },
+    "balance.key.empty" : {
+      "comment" : "Error shown when saving an empty API key.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Please enter an API key."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请输入 API Key。"
+          }
+        }
+      }
+    },
+    "balance.key.hint" : {
+      "comment" : "Hint below the API key field, explaining where to create a key and that it is stored in the Keychain.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create a key at platform.deepseek.com. It is stored in your Keychain."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 platform.deepseek.com 创建，Key 会保存到系统钥匙串。"
+          }
+        }
+      }
+    },
+    "balance.key.placeholder" : {
+      "comment" : "Placeholder of the API key secure field.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sk-…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sk-…"
+          }
+        }
+      }
+    },
+    "balance.key.remove" : {
+      "comment" : "API key editor: delete the saved key.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除"
+          }
+        }
+      }
+    },
+    "balance.key.save" : {
+      "comment" : "API key editor: save the entered key.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存"
+          }
+        }
+      }
+    },
+    "balance.key.saveFailed" : {
+      "comment" : "Error shown when the API key could not be written to the Keychain. %@ is the system reason.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn’t save the API key: %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法保存 API Key：%@"
+          }
+        }
+      }
+    },
+    "balance.loading" : {
+      "comment" : "Placeholder while the balance request is in flight.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refreshing…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在刷新…"
+          }
+        }
+      }
+    },
+    "balance.noKey.hint" : {
+      "comment" : "Hint shown in the balance block before an API key is saved.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add an API key to see your balance here."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "填写 API Key 后即可在这里看到余额。"
+          }
+        }
+      }
+    },
+    "balance.refresh" : {
+      "comment" : "Button that refreshes the balance right now.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refresh"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "刷新"
+          }
+        }
+      }
+    },
+    "balance.retry" : {
+      "comment" : "Button that retries a failed balance refresh.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retry"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重试"
+          }
+        }
+      }
+    },
+    "balance.title" : {
+      "comment" : "Title of the balance block in the popover.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Account balance"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "账户余额"
+          }
+        }
+      }
+    },
+    "balance.toppedUp" : {
+      "comment" : "Balance breakdown: topped-up (paid) balance. %@ is an amount such as ¥100.00.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Topped up %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "充值 %@"
+          }
+        }
+      }
+    },
+    "balance.unavailable" : {
+      "comment" : "Warning shown when is_available is false, i.e. API calls are paused.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not enough balance — API calls are paused."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "余额不足，API 调用已暂停。"
+          }
+        }
+      }
+    },
+    "balance.updated" : {
+      "comment" : "Timestamp of the last successful refresh, shown after the Refresh button. %@ is a time such as 14:32.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Updated %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新于 %@"
+          }
+        }
+      }
+    },
     "duration.day.one" : {
       "comment" : "Countdown duration, exactly one day.",
       "localizations" : {
@@ -201,6 +609,125 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "检查更新…"
+          }
+        }
+      }
+    },
+    "menu.edit" : {
+      "comment" : "Title of the hidden Edit menu. The menu bar is never shown in an agent app, but its key equivalents (⌘C/⌘V/…) are what makes the shortcuts work.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "编辑"
+          }
+        }
+      }
+    },
+    "menu.edit.copy" : {
+      "comment" : "Hidden Edit menu item (⌘C).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拷贝"
+          }
+        }
+      }
+    },
+    "menu.edit.cut" : {
+      "comment" : "Hidden Edit menu item (⌘X).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cut"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "剪切"
+          }
+        }
+      }
+    },
+    "menu.edit.paste" : {
+      "comment" : "Hidden Edit menu item (⌘V).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paste"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "粘贴"
+          }
+        }
+      }
+    },
+    "menu.edit.redo" : {
+      "comment" : "Hidden Edit menu item (⇧⌘Z).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Redo"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重做"
+          }
+        }
+      }
+    },
+    "menu.edit.selectAll" : {
+      "comment" : "Hidden Edit menu item (⌘A).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select All"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全选"
+          }
+        }
+      }
+    },
+    "menu.edit.undo" : {
+      "comment" : "Hidden Edit menu item (⌘Z).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Undo"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "撤销"
           }
         }
       }

@@ -20,6 +20,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private let store = PricingStore()
+    /// 账户余额：启动刷新一次 + 定时刷新（见 `BalanceStore`）。
+    private let balance = BalanceStore()
     /// 自动更新（Sparkle）。
     private let updater = Updater()
     private var statusItem: NSStatusItem?
@@ -34,7 +36,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
+        // 装一个看不见的 Edit 主菜单：否则输入框里 ⌘C / ⌘V / ⌘A 全都无响应（见 MainMenu）。
+        MainMenu.install()
         store.start()
+        // 读钥匙串里的 API Key，有就立刻查一次余额，之后按间隔自动刷新。
+        balance.start()
         applyLaunchOverrides()
         configureStatusItem()
         // Sparkle 弹出任何自己的窗口前，先把面板收起来 —— 否则普通层级的更新窗口
@@ -242,6 +248,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         store.refresh()
         refreshMenuBarNow()
+        // 打开面板时顺手看一眼余额是不是已经过期，过期就刷一次。
+        balance.refreshIfNeeded()
         showPanel(relativeTo: sender)
     }
 
@@ -263,6 +271,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let makeContent: (CGFloat?) -> StatusPanelContent = { limit in
             StatusPanelContent(store: self.store,
                                onQuit: { NSApp.terminate(nil) },
+                               balance: self.balance,
                                maxHeight: limit,
                                automaticallyChecksForUpdates: self.autoCheckBinding,
                                onCheckForUpdates: { self.checkForUpdates() })

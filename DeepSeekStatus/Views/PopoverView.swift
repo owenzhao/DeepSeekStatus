@@ -8,6 +8,8 @@ struct PopoverView: View {
 
     @ObservedObject var store: PricingStore
     var onQuit: () -> Void
+    /// 账户余额（含 API Key 的输入 / 更换）。由 AppDelegate 创建并统一驱动刷新。
+    @ObservedObject var balance: BalanceStore
     /// 自动检查更新开关 + 手动检查回调。
     /// 刻意用 `Binding` / 闭包而不是直接引用 Sparkle，离屏渲染工具才能不链接 Sparkle 编译这些视图。
     var automaticallyChecksForUpdates: Binding<Bool> = .constant(false)
@@ -26,6 +28,7 @@ struct PopoverView: View {
                 headerSection
                 priceSection
                 countdownSection
+                balanceSection
                 Divider()
                 scheduleSection
                 Divider()
@@ -133,6 +136,12 @@ struct PopoverView: View {
             }
             .frame(height: 3)
         }
+    }
+
+    // MARK: - 账户余额
+
+    private var balanceSection: some View {
+        BalanceSection(store: balance)
     }
 
     // MARK: - 规则
@@ -288,11 +297,11 @@ struct PopoverView: View {
 }
 
 #Preview("弹窗 · 高峰") {
-    PopoverView(store: PricingStore(now: Date()), onQuit: {})
+    PopoverView(store: PricingStore(now: Date()), onQuit: {}, balance: .preview())
 }
 
 #Preview("弹窗 · 空闲") {
     let store = PricingStore(now: Date())
     store.previewPeriod = .offPeak
-    return PopoverView(store: store, onQuit: {})
+    return PopoverView(store: store, onQuit: {}, balance: .preview())
 }

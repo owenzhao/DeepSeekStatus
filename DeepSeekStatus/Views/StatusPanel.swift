@@ -52,6 +52,7 @@ final class StatusPanel: NSPanel {
 struct StatusPanelContent: View {
     @ObservedObject var store: PricingStore
     var onQuit: () -> Void
+    @ObservedObject var balance: BalanceStore
     var maxHeight: CGFloat?
     /// 自动检查更新开关与手动检查回调。界面层只用 `Binding`，不直接依赖 Sparkle。
     var automaticallyChecksForUpdates: Binding<Bool> = .constant(false)
@@ -60,6 +61,7 @@ struct StatusPanelContent: View {
     private var content: some View {
         PopoverView(store: store,
                     onQuit: onQuit,
+                    balance: balance,
                     automaticallyChecksForUpdates: automaticallyChecksForUpdates,
                     onCheckForUpdates: onCheckForUpdates)
     }
