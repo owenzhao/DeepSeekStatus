@@ -2,7 +2,7 @@
 
 # 🐳 DeepSeek Status
 
-**A tiny macOS menu bar app that tells you — at a glance — whether DeepSeek is in peak or off-peak pricing.**
+**A tiny macOS menu bar app that tells you — at a glance — whether DeepSeek is in peak or off-peak pricing, and how much is left in your API balance.**
 
 <img src="Preview/menubar-gray-peak.png" width="640" alt="DeepSeek Status in the menu bar">
 
@@ -10,7 +10,7 @@
 [![Platform](https://img.shields.io/badge/platform-macOS%2014%2B-blue)](#requirements)
 [![Swift](https://img.shields.io/badge/Swift-5-orange)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![No network](https://img.shields.io/badge/network-none-brightgreen)](#privacy)
+[![Network](https://img.shields.io/badge/network-opt--in-brightgreen)](#privacy)
 
 </div>
 
@@ -21,8 +21,8 @@ worth answering without opening a browser tab. DeepSeek Status answers it with a
 - 😴 **Off-peak hours** — a pale, sleepy whale lying on its side, with little `z`s floating above it.
 
 Click the whale to open a panel with the current period, the price multiplier, a live countdown to
-the next switch, and a weekly schedule heat map. Optionally it can also show the countdown directly
-next to the menu bar icon.
+the next switch, a weekly schedule heat map, and — once you paste an API key — the balance left on
+your DeepSeek account. Optionally it can also show the countdown directly next to the menu bar icon.
 
 ---
 
@@ -31,7 +31,7 @@ next to the menu bar icon.
 | Peak hours (`×1.0`) | Off-peak hours (`×0.5`) |
 | :---: | :---: |
 | <img src="Preview/live-panel-peak.png" width="330" alt="Panel during peak hours"> | <img src="Preview/live-panel-offPeak.png" width="330" alt="Panel during off-peak hours"> |
-| *Captured live during peak hours.* | *Captured live; the banner is preview mode being on.* |
+| *Captured live; the banner is preview mode being on.* | *Captured live during off-peak hours.* |
 
 Menu bar in both states and on different menu bar backgrounds:
 
@@ -119,6 +119,8 @@ menu bar extras.
 | --- | --- |
 | **Left-click** the whale | Open / close the details panel |
 | **Right-click** the whale | Quick menu: preview peak, preview off-peak, follow live time, show countdown in the menu bar, quit |
+| **Account balance** | Appears in the panel once an API key is saved. **Refresh** queries it immediately; the time of the last successful refresh sits next to the button |
+| **Enter / Change API Key** | Opens the key field in the panel. The key is stored in the macOS Keychain; **Remove** deletes it |
 | **Preview** picker in the panel | Force the app to *display* peak or off-peak so you can see both looks at any time. It only changes what is drawn, never the real pricing |
 | **Show countdown in the menu bar** | Adds an `HH:MM:SS` countdown next to the whale (off by default) |
 | **Launch at login** | Registers the app as a login item via `SMAppService` (off by default) |
@@ -130,6 +132,8 @@ The panel contains:
 - the current period and its price multiplier (`×1.0` / `×0.5`);
 - a "current unit price" comparison bar;
 - the countdown to the next switch, plus how far through the current block you are;
+- **the account balance** once an API key is saved — total, plus the granted / topped-up split, a
+  Refresh button and the time of the last successful refresh;
 - a 7×24 weekly heat map — blue = peak, gray = off-peak, with the current hour outlined;
 - the toggles above, a preview picker, and the update controls.
 
@@ -139,16 +143,42 @@ The panel closes when you click anywhere outside it, press <kbd>Esc</kbd>, or cl
 
 ## Privacy
 
-The app never touches the network. There is no analytics, no update check, no API key, no account.
-It reads your system clock, draws a whale, and that's it. The only system state it writes is the
-optional login item registration.
+The pricing panel needs no account, no key and no network — it reads your system clock and draws a
+whale. The app only talks to the network in two places, and the first one is strictly opt-in:
+
+- **Balance** (opt-in) — if you save a DeepSeek API key, the app calls
+  `GET https://api.deepseek.com/user/balance` on launch, every 5 minutes, and when the panel opens or
+  the Mac wakes with stale data. Your key is sent only in the `Authorization` header of that one
+  request. **With no key saved, no request is ever made.**
+- **Updates** — Sparkle reads the appcast from this repository's latest GitHub release (daily by
+  default, switchable off in the panel).
+
+There is **no analytics and no telemetry**. The API key lives in your **macOS Keychain** — the entry
+is encrypted by the system and readable after first unlock — never in a plain-text preferences file,
+and **Remove** in the panel deletes it. It is deliberately *not* wrapped in a second layer of
+home-made encryption: the key to that would have to sit in the same Keychain anyway, which buys
+nothing. The only other system state the app writes is the optional login item registration.
 
 ---
 
 ## FAQ
 
 **Does it call the DeepSeek API or need an API key?**
-No. It is a calendar, not a client. It only reads the local clock.
+Only if you want the balance. The pricing side is a calendar, not a client — it reads the local clock
+and works with no key at all. If you paste a key into the panel, the app stores it in the Keychain and
+calls `GET /user/balance` to show what is left. That is the only DeepSeek endpoint it ever calls, and
+the balance is **account-wide**: every key of an account returns the same numbers.
+
+**Where is the API key stored, and how do I delete it?**
+In the macOS Keychain, as a generic password scoped to this app
+(`com.parussoft.DeepSeekStatus.deepseek`). It is never written to `UserDefaults` or any plain file, and
+it is not encrypted a second time by the app itself — see [Privacy](#privacy) for why. **Remove** in
+the panel's key editor deletes it.
+
+**My key expired. Can I still replace it?**
+Yes, and that case is handled explicitly: a failed refresh always offers **Change API Key**, and an
+expired key is reported as *"The API key is invalid or expired. Replace it?"*. A working key can be
+replaced too, from the small key button next to the refresh time.
 
 **Which time zone is used?**
 Beijing time (`Asia/Shanghai`, UTC+8, no DST) always, no matter where your Mac is. This is
@@ -196,6 +226,9 @@ the machine is back.
 - The panel is a self-positioned `NSPanel` (not `NSPopover`), so it can never be pushed off-screen.
 - The schedule is computed from a fixed `Asia/Shanghai` calendar with half-open intervals; the app
   refreshes once per second and also on clock changes, day changes and wake from sleep.
+- The balance is one `GET /user/balance` call carrying the key from the Keychain. Responses carry a
+  token, so a reply that arrives after you have already saved a different key is discarded instead of
+  overwriting the new key's state.
 
 Architecture, tooling, measurements and the pitfalls found along the way are documented in
 **[Docs/DEVELOPMENT.md](Docs/DEVELOPMENT.md)**.
