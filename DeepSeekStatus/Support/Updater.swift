@@ -74,6 +74,17 @@ private final class SparkleDelegate: NSObject, SPUUpdaterDelegate, SPUStandardUs
         print("[诊断] \(message)")
     }
 
+    // MARK: - 温和提醒
+
+    /// 声明本 App 支持「温和提醒」（gentle reminders）。
+    ///
+    /// 应用是后台运行的 agent（`LSUIElement`，无 Dock 图标）。Sparkle 在后台安排更新检查时，
+    /// 会检查 user driver delegate 是否实现了这个属性：没实现（或返回 false）就会记一条
+    /// 「Background app automatically schedules for update checks but does not implement gentle reminders」
+    /// 的警告（见 `SPUStandardUserDriver.m` 的 `logGentleScheduledUpdateReminderWarningIfNeeded`）。
+    /// 返回 true 即表示已知晓后台更新提示可能被用户忽略，警告随之消失。
+    var supportsGentleScheduledUpdateReminders: Bool { true }
+
     // MARK: - 即将显示自己的窗口（面板会盖住它，需要先收起）
 
     func standardUserDriverWillShowModalAlert() {
