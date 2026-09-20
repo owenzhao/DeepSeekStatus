@@ -51,19 +51,30 @@ SIGN_IDENTITY=$(codesign -dv --verbose=4 "$APP" 2>&1 | sed -n 's/^Authority=\(De
 
 SPARKLE="$APP/Contents/Frameworks/Sparkle.framework"
 if [[ -d "$SPARKLE" ]]; then
-  # framework 内的可执行清单（Autoupdate 是独立可执行，不是 .app/.xpc，别漏），
-  # 全部签完再签 framework 本身。
-  for nested in \
-    "$SPARKLE/Versions/B/Autoupdate" \
-    "$SPARKLE/Versions/B/XPCServices/Installer.xpc" \
-    "$SPARKLE/Versions/B/XPCServices/Downloader.xpc" \
-    "$SPARKLE/Versions/B/Updater.app" \
-    "$SPARKLE"; do
-    [[ -e "$nested" ]] && codesign --force --options runtime --timestamp --sign "$SIGN_IDENTITY" "$nested"
-  done
+  # 按 Sparkle 官方顺序从内到外签名。Downloader 自带的 entitlement
+  # 必须保留；Autoupdate 是独立可执行文件，不能遗漏。
+  codesign --force --options runtime --timestamp --sign "$SIGN_IDENTITY" \
+    "$SPARKLE/Versions/B/XPCServices/Installer.xpc"
+  codesign --force --options runtime --timestamp --preserve-metadata=entitlements \
+    --sign "$SIGN_IDENTITY" "$SPARKLE/Versions/B/XPCServices/Downloader.xpc"
+  codesign --force --options runtime --timestamp --sign "$SIGN_IDENTITY" \
+    "$SPARKLE/Versions/B/Autoupdate"
+  codesign --force --options runtime --timestamp --sign "$SIGN_IDENTITY" \
+    "$SPARKLE/Versions/B/Updater.app"
+  codesign --force --options runtime --timestamp --sign "$SIGN_IDENTITY" "$SPARKLE"
 fi
 codesign --force --options runtime --timestamp --sign "$SIGN_IDENTITY" "$APP"
 codesign --verify --deep --strict "$APP"
+
+# Sparkle 的安全原子替换要求 Autoupdate 与新 App 属于同一 Team ID。
+# 不在发布前硬性检查，签名看似成功也可能在升级时才暴露。
+APP_TEAM=$(codesign -dv --verbose=4 "$APP" 2>&1 | sed -n 's/^TeamIdentifier=//p')
+AUTOUPDATE="$SPARKLE/Versions/B/Autoupdate"
+AUTOUPDATE_TEAM=$(codesign -dv --verbose=4 "$AUTOUPDATE" 2>&1 | sed -n 's/^TeamIdentifier=//p')
+[[ -n "$APP_TEAM" && "$APP_TEAM" == "$AUTOUPDATE_TEAM" ]] || {
+  echo "❌ App Team ID ($APP_TEAM) 与 Autoupdate Team ID ($AUTOUPDATE_TEAM) 不一致"
+  exit 1
+}
 echo "✅ 已重签：${SIGN_IDENTITY}"
 
 # 2. 打包。用 ditto 保住符号链接与可执行权限，App 里嵌的 Sparkle.framework 才能被加载。
