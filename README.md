@@ -31,7 +31,14 @@ your DeepSeek account. Optionally it can also show the countdown directly next t
 | Peak hours (`×1.0`) | Off-peak hours (`×0.5`) |
 | :---: | :---: |
 | <img src="Preview/live-panel-peak.png" width="330" alt="Panel during peak hours"> | <img src="Preview/live-panel-offPeak.png" width="330" alt="Panel during off-peak hours"> |
-| *Captured live; the banner is preview mode being on.* | *Captured live during off-peak hours.* |
+| *Current English build in peak preview mode.* | *Current English build in off-peak preview mode.* |
+
+The new schedule views:
+
+| Monthly calendar | Weekly hours |
+| :---: | :---: |
+| <img src="Preview/live-panel-calendar.png" width="330" alt="Panel showing the monthly pricing calendar"> | <img src="Preview/live-panel-week.png" width="330" alt="Panel showing the weekly pricing hours"> |
+| *Public holidays and all-day off-peak dates at a glance.* | *The familiar 7×24 peak and off-peak grid.* |
 
 Menu bar in both states and on different menu bar backgrounds:
 
