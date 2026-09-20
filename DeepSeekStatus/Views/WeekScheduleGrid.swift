@@ -5,6 +5,8 @@ import SwiftUI
 /// 蓝色格子是高峰时段，灰色格子是空闲时段，当前所在的格子会用圆环标出来。
 struct WeekScheduleGrid: View {
     var now: Date
+    var referenceDate: Date
+    var schedule: HolidaySchedule
 
     /// 行标题：周一 → 周日，跟随界面语言（"Mon" / 「周一」）。
     private var rowLabels: [String] { PricingFormatter.weekdaySymbolsMondayFirst }
@@ -56,9 +58,14 @@ struct WeekScheduleGrid: View {
         let radius = min(2, cellWidth / 3)
 
         let calendar = DeepSeekPricing.calendar
+        guard let weekStart = calendar.dateInterval(of: .weekOfYear, for: referenceDate)?.start else { return }
+        let currentWeek = calendar.dateInterval(of: .weekOfYear, for: now)?.start
+        let isCurrentWeek = currentWeek.map { calendar.isDate($0, inSameDayAs: weekStart) } ?? false
         let currentWeekday = calendar.component(.weekday, from: now) // 1 = 周日
         let currentHour = calendar.component(.hour, from: now)
         let currentRow = (currentWeekday + 5) % 7 // 周一 → 0
+        let selectedWeekday = calendar.component(.weekday, from: referenceDate)
+        let selectedRow = (selectedWeekday + 5) % 7
 
         func rect(row: Int, column: Int) -> CGRect {
             CGRect(x: labelWidth + CGFloat(column) * (cellWidth + gap),
@@ -68,30 +75,34 @@ struct WeekScheduleGrid: View {
         }
 
         // 当前小时所在的列，加一层淡淡的底色。
-        let hourBand = CGRect(x: labelWidth + CGFloat(currentHour) * (cellWidth + gap) - gap / 2,
-                              y: 0,
-                              width: cellWidth + gap,
-                              height: CGFloat(rows) * cellHeight + CGFloat(rows - 1) * gap)
-        context.fill(Path(roundedRect: hourBand, cornerRadius: 2), with: .color(.primary.opacity(0.07)))
+        if isCurrentWeek {
+            let hourBand = CGRect(x: labelWidth + CGFloat(currentHour) * (cellWidth + gap) - gap / 2,
+                                  y: 0,
+                                  width: cellWidth + gap,
+                                  height: CGFloat(rows) * cellHeight + CGFloat(rows - 1) * gap)
+            context.fill(Path(roundedRect: hourBand, cornerRadius: 2), with: .color(.primary.opacity(0.07)))
+        }
 
         for row in 0..<rows {
             let weekdayLabel = context.resolve(
                 Text(verbatim: rowLabels[row])
-                    .font(.system(size: 8, weight: row == currentRow ? .bold : .medium))
-                    .foregroundStyle(row == currentRow ? Color.primary : Color.secondary)
+                    .font(.system(size: 8, weight: row == selectedRow ? .bold : .medium))
+                    .foregroundStyle(row == selectedRow ? Color.primary : Color.secondary)
             )
             context.draw(weekdayLabel,
                          at: CGPoint(x: labelWidth - 7, y: rect(row: row, column: 0).midY),
                          anchor: .trailing)
 
             for column in 0..<columns {
-                let isPeak = row < 5 && DeepSeekPricing.peakHourRanges.contains { $0.contains(column) }
+                guard let day = calendar.date(byAdding: .day, value: row, to: weekStart),
+                      let hour = calendar.date(bySettingHour: column, minute: 0, second: 0, of: day) else { continue }
+                let isPeak = DeepSeekPricing.period(at: hour, schedule: schedule) == .peak
                 let path = Path(roundedRect: rect(row: row, column: column), cornerRadius: radius)
                 context.fill(path, with: .color(isPeak
                                                 ? WhaleTheme.brandBlue.opacity(0.92)
                                                 : Color.secondary.opacity(0.18)))
 
-                if row == currentRow && column == currentHour {
+                if isCurrentWeek && row == currentRow && column == currentHour {
                     context.stroke(path, with: .color(.primary.opacity(0.85)), lineWidth: 1.3)
                 }
             }
@@ -117,7 +128,7 @@ struct WeekScheduleGrid: View {
 }
 
 #Preview("一周时段表") {
-    WeekScheduleGrid(now: Date())
+    WeekScheduleGrid(now: Date(), referenceDate: Date(), schedule: .bundled)
         .frame(width: 288)
         .padding()
 }

@@ -18,6 +18,126 @@
         }
       }
     },
+    "calendar.coverage.warning" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Official holiday data is not available for this year. Weekday results use the base schedule." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "这一年的官方节假日安排尚未收录，工作日暂按基础时段规则显示。" } }
+      }
+    },
+    "calendar.detail.alternateWorkday" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%@ make-up workday, but it is a weekend · Off-peak all day" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "%@调休上班，但当天为周末 · 全天空闲" } }
+      }
+    },
+    "calendar.detail.holiday" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "%@ holiday · Off-peak all day" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "%@假期 · 全天空闲" } }
+      }
+    },
+    "calendar.detail.weekday" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Regular weekday · Peak 09:00–12:00 and 14:00–18:00" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "普通工作日 · 09:00–12:00、14:00–18:00 高峰" } }
+      }
+    },
+    "calendar.detail.weekend" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Weekend · Off-peak all day" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "周末 · 全天空闲" } }
+      }
+    },
+    "calendar.legend.allDayOffPeak" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Off-peak all day" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "全天空闲" } }
+      }
+    },
+    "calendar.legend.timed" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Time-based pricing" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "分时计价" } }
+      }
+    },
+    "calendar.nextMonth" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Next month" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "下个月" } }
+      }
+    },
+    "calendar.previousMonth" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Previous month" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "上个月" } }
+      }
+    },
+    "calendar.today" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Today" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "今天" } }
+      }
+    },
+    "holiday.dragonBoat" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Dragon Boat Festival" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "端午节" } }
+      }
+    },
+    "holiday.labourDay" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Labor Day" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "劳动节" } }
+      }
+    },
+    "holiday.midAutumn" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Mid-Autumn Festival" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "中秋节" } }
+      }
+    },
+    "holiday.nationalDay" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "National Day" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "国庆节" } }
+      }
+    },
+    "holiday.newYear" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "New Year’s Day" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "元旦" } }
+      }
+    },
+    "holiday.public" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Public holiday" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "公众假期" } }
+      }
+    },
+    "holiday.qingming" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Qingming Festival" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "清明" } }
+      }
+    },
+    "holiday.springFestival" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Chinese New Year" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "春节" } }
+      }
+    },
+    "schedule.mode.calendar" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Monthly calendar" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "月度日历" } }
+      }
+    },
+    "schedule.mode.week" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Weekly hours" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "周时段" } }
+      }
+    },
     "balance.empty" : {
       "comment" : "Balance: the API returned no balance entries.",
       "localizations" : {
@@ -1180,13 +1300,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "All other times (including weekends)"
+            "value" : "All other times, weekends, and Chinese public holidays"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "其余时间（含周末全天）"
+            "value" : "其余时间、周末及中国官方节假日"
           }
         }
       }

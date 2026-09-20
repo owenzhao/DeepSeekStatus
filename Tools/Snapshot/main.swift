@@ -194,12 +194,13 @@ func renderPreviewSet() {
     }
 
     // 6. 一周时段表
-    render(WeekScheduleGrid(now: now).padding(12).background(Color(nsColor: .windowBackgroundColor)),
+    render(WeekScheduleGrid(now: now, referenceDate: now, schedule: .bundled)
+            .padding(12).background(Color(nsColor: .windowBackgroundColor)),
            size: CGSize(width: 320, height: 120), scale: 2, name: "week-grid")
 
     // 7. 完整弹窗（两种状态），高度按内容自适应
     for period in PricePeriod.allCases {
-        let store = PricingStore(now: now)
+        let store = PricingStore(now: now, holidaySchedule: .bundled)
         store.previewPeriod = period
         renderNatural(PopoverView(store: store, onQuit: {}, balance: .preview())
                         .background(Color(nsColor: .windowBackgroundColor)),
@@ -210,7 +211,7 @@ func renderPreviewSet() {
     // 7b. 余额区块的另外两种状态：还没填 Key、以及 Key 失效
     for (name, balance) in [("popover-no-key", BalanceStore.preview(state: .noKey, hasKey: false, lastRefreshed: nil)),
                             ("popover-key-invalid", BalanceStore.preview(state: .failed(.unauthorized)))] {
-        let store = PricingStore(now: now)
+        let store = PricingStore(now: now, holidaySchedule: .bundled)
         store.previewPeriod = .peak
         renderNatural(PopoverView(store: store, onQuit: {}, balance: balance)
                         .background(Color(nsColor: .windowBackgroundColor)),
@@ -326,14 +327,14 @@ func renderColorCandidates() {
 func measure() {
     let now = Date()
     for period in PricePeriod.allCases {
-        let store = PricingStore(now: now)
+        let store = PricingStore(now: now, holidaySchedule: .bundled)
         store.previewPeriod = period
         let hosting = NSHostingView(rootView: PopoverView(store: store, onQuit: {}, balance: .preview()))
         print("弹窗 \(period.title): \(hosting.fittingSize)")
     }
     let aquarium = NSHostingView(rootView: AquariumView(period: .peak, now: now))
     print("水族箱: \(aquarium.fittingSize)")
-    let grid = NSHostingView(rootView: WeekScheduleGrid(now: now))
+    let grid = NSHostingView(rootView: WeekScheduleGrid(now: now, referenceDate: now, schedule: .bundled))
     print("时段表: \(grid.fittingSize)")
     let menuBarHeight = NSStatusBar.system.thickness
     let whaleWidth = WhaleScene.menuBarWhaleWidth(forStageHeight: menuBarHeight)
@@ -354,6 +355,8 @@ func checkSchedule() {
         return calendar.date(from: components)!
     }
 
+    let schedule = HolidaySchedule.bundled
+
     // 2026-09-14 是周一。
     let cases: [(String, Date, PricePeriod, Date)] = [
         ("周一 08:59", date(2026, 9, 14, 8, 59), .offPeak, date(2026, 9, 14, 9, 0)),
@@ -373,7 +376,7 @@ func checkSchedule() {
 
     var failures = 0
     for (label, moment, expectedPeriod, expectedNext) in cases {
-        let snapshot = PricingSnapshot(now: moment)
+        let snapshot = PricingSnapshot(now: moment, schedule: schedule)
         let periodOK = snapshot.period == expectedPeriod
         let nextOK = abs(snapshot.nextTransition.timeIntervalSince(expectedNext)) < 1
         let nextLabel = PricingFormatter.transitionDescription(snapshot.nextTransition, relativeTo: moment)
@@ -383,11 +386,64 @@ func checkSchedule() {
 
     // 同一时刻换算到别的时区，结论必须一致（规则固定按北京时间）。
     let instant = date(2026, 9, 14, 10, 30)
-    let base = DeepSeekPricing.period(at: instant)
+    let base = DeepSeekPricing.period(at: instant, schedule: schedule)
     let consistent = ["America/Los_Angeles", "Europe/London", "Asia/Tokyo", "UTC"]
-        .allSatisfy { _ in DeepSeekPricing.period(at: instant) == base }
+        .allSatisfy { _ in DeepSeekPricing.period(at: instant, schedule: schedule) == base }
     print("\(consistent ? "✅" : "❌") 时区无关性：周一 10:30 北京时间 = \(base.title)（与本地时区无关）")
     if !consistent { failures += 1 }
+
+    let holidayCases: [(String, Date, PricePeriod)] = [
+        ("调休上班周日", date(2026, 9, 20, 10, 0), .offPeak),
+        ("中秋周五", date(2026, 9, 25, 10, 0), .offPeak),
+        ("国庆周一", date(2026, 10, 5, 10, 0), .offPeak),
+        ("节后普通周四", date(2026, 10, 8, 10, 0), .peak),
+        ("调休上班周六", date(2026, 10, 10, 10, 0), .offPeak),
+    ]
+    for (label, moment, expected) in holidayCases {
+        let actual = DeepSeekPricing.period(at: moment, schedule: schedule)
+        if actual != expected { failures += 1 }
+        print("\(actual == expected ? "✅" : "❌") \(label) → \(actual.title)")
+    }
+
+    let springHoliday = PricingSnapshot(now: date(2026, 2, 16, 10, 0), schedule: schedule)
+    let expectedAfterSpring = date(2026, 2, 24, 9, 0)
+    let springOK = abs(springHoliday.nextTransition.timeIntervalSince(expectedAfterSpring)) < 1
+    if !springOK { failures += 1 }
+    print("\(springOK ? "✅" : "❌") 春节长假跳到节后首个真实高峰")
+
+    let sampleICS = """
+    BEGIN:VCALENDAR\r
+    BEGIN:VEVENT\r
+    DTSTART;VALUE=DATE:20261001\r
+    DTEND;VALUE=DATE:20261008\r
+    SUMMARY;LANGUAGE=zh_CN:国庆节（休）\r
+    X-APPLE-SPECIAL-DAY:WORK-HOLIDAY\r
+    END:VEVENT\r
+    BEGIN:VEVENT\r
+    DTSTART;VALUE=DATE:20261010\r
+    SUMMARY;LANGUAGE=zh_CN:国庆节（班）\r
+    X-APPLE-SPECIAL-DAY:ALTERNATE-\r
+     WORKDAY\r
+    END:VEVENT\r
+    BEGIN:VEVENT\r
+    DTSTART;VALUE=DATE:20261023\r
+    SUMMARY;LANGUAGE=zh_CN:霜降\r
+    END:VEVENT\r
+    END:VCALENDAR\r
+    """
+    do {
+        let parsed = try HolidaySchedule.parseICS(Data(sampleICS.utf8))
+        let holidayEndIsExclusive = parsed.holiday(on: date(2026, 10, 7, 12, 0)) != nil
+            && parsed.holiday(on: date(2026, 10, 8, 0, 0)) == nil
+        let foldedLineParsed = parsed.alternateWorkday(on: date(2026, 10, 10, 12, 0)) != nil
+        let ordinaryEventIgnored = parsed.entries.count == 2
+        let parserOK = holidayEndIsExclusive && foldedLineParsed && ordinaryEventIgnored
+        if !parserOK { failures += 1 }
+        print("\(parserOK ? "✅" : "❌") ICS 跨日、结束日、折行与普通事件过滤")
+    } catch {
+        failures += 1
+        print("❌ ICS 解析失败：\(error)")
+    }
 
     print(failures == 0 ? "\n全部通过 ✅" : "\n失败 \(failures) 项 ❌")
 }

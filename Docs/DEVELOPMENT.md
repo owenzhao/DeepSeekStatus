@@ -20,6 +20,7 @@ DeepSeekStatus/
 │   ├── Localizable.xcstrings          # String Catalog: English (source) + Simplified Chinese
 │   ├── Models/
 │   │   ├── PricePeriod.swift          # Schedule rules, next transition, formatting
+│   │   ├── HolidaySchedule.swift      # Apple ICS parsing + bundled holiday fallback
 │   │   └── PricingStore.swift         # 1 Hz state source + user defaults
 │   ├── Support/
 │   │   ├── SVGPath.swift              # SVG path parser (incl. arcs → cubic Béziers)
@@ -34,6 +35,7 @@ DeepSeekStatus/
 │   │   ├── WhaleStage.swift           # SwiftUI whale canvas
 │   │   ├── AquariumView.swift         # Aquarium at the top of the panel
 │   │   ├── WeekScheduleGrid.swift     # Weekly heat map
+│   │   ├── PricingCalendarView.swift  # Monthly calendar + week/calendar switch
 │   │   ├── PopoverView.swift          # Panel content (SwiftUI)
 │   │   └── StatusPanel.swift          # Panel window: rounded corners + scroll fallback
 │   └── Assets.xcassets                # App icon + accent color
@@ -96,8 +98,8 @@ half of the content. Owning the window fixes that:
   <kbd>Esc</kbd>, and the status item button itself. This reproduces `NSPopover`'s `.transient`
   behaviour without handing over control of the geometry.
 
-Panel width is `PopoverView.width` (320 pt). Its natural height is about 594 pt (about 619 pt while
-the preview banner is visible).
+Panel width is `PopoverView.width` (320 pt). With the monthly calendar selected its natural height is
+about 914 pt; the existing `StatusPanelContent` scroll fallback keeps it usable on shorter screens.
 
 ### 2.3 Pricing model
 
@@ -107,7 +109,10 @@ the preview banner is visible).
 - `DeepSeekPricing` — a fixed `Asia/Shanghai` calendar, `peakHourRanges = [9..<12, 14..<18]`,
   `period(at:)`, `nextTransition(after:)`, `currentIntervalStart(before:)`.
 - Ranges are half-open: 09:00 is peak, 12:00 is off-peak, 14:00 is peak, 18:00 is off-peak.
-- Weekends are off-peak all day, so the next transition from Friday 18:00 is Monday 09:00.
+- Weekends and `WORK-HOLIDAY` dates are off-peak all day. `ALTERNATE-WORKDAY` is retained for the
+  explanation shown in the UI, but a weekend remains off-peak even when it is a make-up workday.
+- Actual transitions are searched across holiday ranges, so a long holiday counts as one continuous
+  off-peak interval instead of producing nominal 09:00 transitions inside the holiday.
 - Everything is computed from the Beijing calendar, so the result does not depend on the Mac's own
   time zone (there is a self-check for this, see section 5).
 
@@ -117,6 +122,13 @@ the preview banner is visible).
 `NSWorkspace.didWakeNotification` — so the display is correct immediately after a wake or a manual
 clock change instead of up to a second later. It also owns the user preferences
 (`previewPeriod`, `showsCountdownInMenuBar`, `launchAtLogin`).
+
+`Models/HolidaySchedule.swift` parses Apple’s public China holiday ICS. Only
+`X-APPLE-SPECIAL-DAY:WORK-HOLIDAY` and `ALTERNATE-WORKDAY` events are retained; ordinary festivals,
+solar terms and recurring names are ignored. `DTEND` is exclusive. `PricingStore` loads a normalized
+cache from `Application Support/com.parussoft.DeepSeekStatus/holiday-schedule.json`, falls back to
+the bundled 2026 schedule, and checks the fixed Apple URL at most once every 24 hours with `ETag`.
+Failed downloads or parses never replace the last valid schedule.
 
 ### 2.4 The whale
 
@@ -354,7 +366,7 @@ both sides, the Friday-evening-to-Monday-morning span, and time-zone independenc
 A panel placement check on a 2560×1410 display, with the status item at `(1359, 1414, 46, 22)`:
 
 ```
-面板窗口=(1222.0, 810.0, 320.0, 594.0)   ← centred under the icon, 1222 + 160 = 1382 = icon centre
+面板窗口=(1283.0, 490.0, 320.0, 914.0)   ← centred under the icon and clamped into visibleFrame
 屏幕可见区域=(0.0, 0.0, 2560.0, 1410.0)
 面板是否完全在可见区域内=true
 最近 2 秒 SwiftUI 画布重绘 60 帧 ≈ 30.0 fps（只剩下已打开的面板水族箱）
@@ -370,7 +382,8 @@ With the panel closed, idle CPU is 0.0% and the menu bar icon does not repaint (
 - Screen recording is not available in the environment this app was developed in
   (`screencapture` fails with "could not create image from display"), which is why verification
   relies on offscreen `ImageRenderer` output plus `cacheDisplay` captures from inside the app.
-- The schedule is a weekday/time-of-day rule; there is no holiday calendar.
+- The holiday source is Apple’s public China calendar rather than EventKit: the app never reads or
+  changes the user’s Calendar database and therefore requests no calendar permission.
 - The app is signed with a Developer ID and notarized. `Tools/release.sh` additionally re-signs
   Sparkle's nested helpers (`Autoupdate`, `Updater.app`, and the two XPC services), which
   `xcodebuild` leaves ad-hoc — notarization rejects them otherwise.

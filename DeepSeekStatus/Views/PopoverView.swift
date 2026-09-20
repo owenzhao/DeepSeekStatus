@@ -73,10 +73,19 @@ struct PopoverView: View {
                     .font(.system(size: 15, weight: .bold, design: .rounded))
                     .foregroundStyle(WhaleTheme.accent(for: period))
             }
-            Text(period.summary)
+            Text(headerDetail)
                 .font(.system(size: 11.5))
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var headerDetail: String {
+        switch snapshot.dayInfo.kind {
+        case .publicHoliday, .alternateWorkdayWeekend:
+            snapshot.dayInfo.localizedDetail
+        case .weekend, .regularWeekday:
+            period.summary
         }
     }
 
@@ -159,9 +168,9 @@ struct PopoverView: View {
             ruleRow(color: Color.secondary.opacity(0.35),
                     title: PricePeriod.offPeak.shortTitle,
                     detail: String(localized: "popover.schedule.offPeak.detail",
-                                   defaultValue: "All other times (including weekends)"))
+                                   defaultValue: "All other times, weekends, and Chinese public holidays"))
 
-            WeekScheduleGrid(now: snapshot.now)
+            PricingScheduleView(now: snapshot.now, schedule: store.holidaySchedule)
 
             Text(footnote)
                 .font(.system(size: 9.5))
@@ -297,11 +306,11 @@ struct PopoverView: View {
 }
 
 #Preview("弹窗 · 高峰") {
-    PopoverView(store: PricingStore(now: Date()), onQuit: {}, balance: .preview())
+    PopoverView(store: PricingStore(now: Date(), holidaySchedule: .bundled), onQuit: {}, balance: .preview())
 }
 
 #Preview("弹窗 · 空闲") {
-    let store = PricingStore(now: Date())
+    let store = PricingStore(now: Date(), holidaySchedule: .bundled)
     store.previewPeriod = .offPeak
     return PopoverView(store: store, onQuit: {}, balance: .preview())
 }

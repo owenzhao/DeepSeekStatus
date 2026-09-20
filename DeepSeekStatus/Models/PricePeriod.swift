@@ -58,6 +58,61 @@ enum PricePeriod: String, CaseIterable, Identifiable, Sendable {
     }
 }
 
+/// 北京时间某个自然日采用的计费规则及其原因。
+struct PricingDayInfo: Equatable {
+    enum Kind: Equatable {
+        case publicHoliday(String)
+        case alternateWorkdayWeekend(String)
+        case weekend
+        case regularWeekday
+    }
+
+    let kind: Kind
+    let scheduleIsCovered: Bool
+
+    var isAllDayOffPeak: Bool {
+        switch kind {
+        case .regularWeekday: false
+        case .publicHoliday, .alternateWorkdayWeekend, .weekend: true
+        }
+    }
+
+    var localizedDetail: String {
+        switch kind {
+        case .publicHoliday(let name):
+            return String(format: String(localized: "calendar.detail.holiday",
+                                         defaultValue: "%@ holiday · Off-peak all day"),
+                          HolidaySchedule.localizedHolidayName(name))
+        case .alternateWorkdayWeekend(let name):
+            return String(format: String(localized: "calendar.detail.alternateWorkday",
+                                         defaultValue: "%@ make-up workday, but it is a weekend · Off-peak all day"),
+                          HolidaySchedule.localizedHolidayName(name))
+        case .weekend:
+            return String(localized: "calendar.detail.weekend",
+                          defaultValue: "Weekend · Off-peak all day")
+        case .regularWeekday:
+            return String(localized: "calendar.detail.weekday",
+                          defaultValue: "Regular weekday · Peak 09:00–12:00 and 14:00–18:00")
+        }
+    }
+}
+
+extension HolidaySchedule {
+    /// Apple 的中文订阅只提供中文标题；已知节日映射成本地化名称，未知名称保守显示“公众假期”。
+    static func localizedHolidayName(_ name: String) -> String {
+        switch name {
+        case "元旦": return String(localized: "holiday.newYear", defaultValue: "New Year’s Day")
+        case "春节": return String(localized: "holiday.springFestival", defaultValue: "Chinese New Year")
+        case "清明": return String(localized: "holiday.qingming", defaultValue: "Qingming Festival")
+        case "劳动节": return String(localized: "holiday.labourDay", defaultValue: "Labor Day")
+        case "端午节": return String(localized: "holiday.dragonBoat", defaultValue: "Dragon Boat Festival")
+        case "中秋节": return String(localized: "holiday.midAutumn", defaultValue: "Mid-Autumn Festival")
+        case "国庆节": return String(localized: "holiday.nationalDay", defaultValue: "National Day")
+        default: return String(localized: "holiday.public", defaultValue: "Public holiday")
+        }
+    }
+}
+
 /// 计算某个时刻所处的时段，以及与之相关的时间信息。
 enum DeepSeekPricing {
     /// 计费规则使用的时区：北京时间（UTC+8，无夏令时）。
@@ -81,8 +136,34 @@ enum DeepSeekPricing {
         return calendar
     }()
 
+    /// 返回某一天的计费类型。节假日名称只影响说明，不参与规则匹配。
+    static func dayInfo(for date: Date, schedule: HolidaySchedule) -> PricingDayInfo {
+        let components = calendar.dateComponents([.year, .weekday], from: date)
+        let year = components.year ?? 0
+        let weekday = components.weekday ?? 1
+        let isWeekend = weekday == 1 || weekday == 7
+
+        if isWeekend, let entry = schedule.alternateWorkday(on: date) {
+            return PricingDayInfo(kind: .alternateWorkdayWeekend(entry.name),
+                                  scheduleIsCovered: schedule.isCovered(year: year))
+        }
+        if let entry = schedule.holiday(on: date) {
+            return PricingDayInfo(kind: .publicHoliday(entry.name),
+                                  scheduleIsCovered: schedule.isCovered(year: year))
+        }
+        if isWeekend {
+            return PricingDayInfo(kind: .weekend,
+                                  scheduleIsCovered: schedule.isCovered(year: year))
+        }
+        return PricingDayInfo(kind: .regularWeekday,
+                              scheduleIsCovered: schedule.isCovered(year: year))
+    }
+
     /// 判断某一时刻是否处于高峰时段。
-    static func period(at date: Date) -> PricePeriod {
+    static func period(at date: Date, schedule: HolidaySchedule) -> PricePeriod {
+        if dayInfo(for: date, schedule: schedule).isAllDayOffPeak {
+            return .offPeak
+        }
         let components = calendar.dateComponents([.weekday, .hour, .minute], from: date)
         guard let weekday = components.weekday,
               let hour = components.hour,
@@ -104,32 +185,33 @@ enum DeepSeekPricing {
         }
     }
 
-    /// 往后若干天内的全部时段切换时刻，按时间升序排列（含今天）。
-    private static func upcomingBoundaries(from date: Date, days: Int = 8) -> [Date] {
+    /// 某个日期前后若干天的名义边界；只有边界两侧价格真的不同时才算切换。
+    private static func boundaries(around date: Date, dayOffsets: ClosedRange<Int>) -> [Date] {
         guard let today = calendar.dateInterval(of: .day, for: date)?.start else { return [] }
-        return (0..<days)
+        return dayOffsets
             .compactMap { calendar.date(byAdding: .day, value: $0, to: today) }
             .flatMap { boundaries(onDayStartingAt: $0) }
             .sorted()
     }
 
+    private static func isRealTransition(_ boundary: Date, schedule: HolidaySchedule) -> Bool {
+        period(at: boundary.addingTimeInterval(-1), schedule: schedule)
+            != period(at: boundary, schedule: schedule)
+    }
+
     /// 下一次时段切换的时刻；若当前处于高峰时段，则返回本次高峰结束的时刻。
-    static func nextTransition(after date: Date) -> Date {
-        let current = period(at: date)
-        let candidates = upcomingBoundaries(from: date)
-        let next = candidates.first { $0 > date && period(at: $0) != current }
-        // 兜底：理论上 8 天内一定会出现切换（周末之后的周一 9:00），这里再保险一点。
-        return next ?? calendar.date(byAdding: .day, value: 7, to: date) ?? date
+    static func nextTransition(after date: Date, schedule: HolidaySchedule) -> Date {
+        // 中国法定连续假期远短于 32 天；这个范围覆盖长假，同时避免每秒刷新时做无谓计算。
+        let next = boundaries(around: date, dayOffsets: 0...32)
+            .first { $0 > date && isRealTransition($0, schedule: schedule) }
+        return next ?? calendar.date(byAdding: .day, value: 32, to: date) ?? date
     }
 
     /// 当前这一段「时段区间」的起点：最近一次时段边界。
-    static func currentIntervalStart(before date: Date) -> Date {
-        let candidates = upcomingBoundaries(from: date)
-        let past = candidates.filter { $0 <= date }
-        if let last = past.last { return last }
-        // 极端兜底：往回找一天。
-        let yesterday = calendar.date(byAdding: .day, value: -1, to: date) ?? date
-        return boundaries(onDayStartingAt: calendar.startOfDay(for: yesterday)).last ?? calendar.startOfDay(for: date)
+    static func currentIntervalStart(before date: Date, schedule: HolidaySchedule) -> Date {
+        let last = boundaries(around: date, dayOffsets: -32...0)
+            .last { $0 <= date && isRealTransition($0, schedule: schedule) }
+        return last ?? calendar.startOfDay(for: date)
     }
 }
 
@@ -143,6 +225,8 @@ struct PricingSnapshot: Equatable {
     let nextTransition: Date
     /// 切换之后会进入的时段。
     let nextPeriod: PricePeriod
+    /// 当天为何采用这套计费规则。
+    let dayInfo: PricingDayInfo
 
     /// 距离下一次切换还有多少秒。
     var secondsUntilTransition: TimeInterval {
@@ -157,14 +241,15 @@ struct PricingSnapshot: Equatable {
         return min(max(elapsed / total, 0), 1)
     }
 
-    init(now: Date) {
+    init(now: Date, schedule: HolidaySchedule = .bundled) {
         self.now = now
-        let period = DeepSeekPricing.period(at: now)
+        let period = DeepSeekPricing.period(at: now, schedule: schedule)
         self.period = period
-        self.intervalStart = DeepSeekPricing.currentIntervalStart(before: now)
-        let transition = DeepSeekPricing.nextTransition(after: now)
+        self.dayInfo = DeepSeekPricing.dayInfo(for: now, schedule: schedule)
+        self.intervalStart = DeepSeekPricing.currentIntervalStart(before: now, schedule: schedule)
+        let transition = DeepSeekPricing.nextTransition(after: now, schedule: schedule)
         self.nextTransition = transition
-        self.nextPeriod = DeepSeekPricing.period(at: transition.addingTimeInterval(1))
+        self.nextPeriod = DeepSeekPricing.period(at: transition, schedule: schedule)
     }
 }
 
@@ -221,6 +306,11 @@ enum PricingFormatter {
         string(from: date, template: "EEEEMMMMd")
     }
 
+    /// 月历标题，例如 “September 2026” / “2026年9月”。
+    static func monthYear(_ date: Date) -> String {
+        string(from: date, template: "yMMMM")
+    }
+
     /// 把切换时刻描述成「today 14:00」「tomorrow 09:00」「Mon 09:00」。
     static func transitionDescription(_ date: Date, relativeTo now: Date) -> String {
         let calendar = DeepSeekPricing.calendar
@@ -259,6 +349,16 @@ enum PricingFormatter {
         formatter.setLocalizedDateFormatFromTemplate("EEE")
         let symbols = formatter.shortWeekdaySymbols ?? ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
         // `shortWeekdaySymbols` 的第 0 项是周日，这里重排成周一开头。
+        return (1...7).map { symbols[$0 % 7] }
+    }()
+
+    /// 月历表头使用的最短星期名称，顺序固定为周一 → 周日。
+    static let veryShortWeekdaySymbolsMondayFirst: [String] = {
+        let formatter = DateFormatter()
+        formatter.locale = displayLocale
+        formatter.calendar = DeepSeekPricing.calendar
+        formatter.timeZone = DeepSeekPricing.timeZone
+        let symbols = formatter.veryShortWeekdaySymbols ?? ["S", "M", "T", "W", "T", "F", "S"]
         return (1...7).map { symbols[$0 % 7] }
     }()
 
@@ -311,11 +411,11 @@ enum PricingFormatter {
                 other: String(localized: "duration.second.other", defaultValue: "%lld sec"))
     }
 
-    /// 菜单栏倒计时文案，固定为 `HH:MM:SS`（最长的一段空闲时段也只有 63 小时），
-    /// 配合等宽数字，菜单栏宽度不会因数字跳动而来回抖动。
+    /// 菜单栏倒计时文案使用总小时数 `HH:MM:SS`。连续长假可能超过 99 小时，
+    /// 所以小时位不截断；菜单栏会按实际文本重新量宽。
     static func compactCountdown(_ seconds: TimeInterval) -> String {
         let total = Int(max(0, seconds).rounded(.down))
-        let hours = min(total / 3_600, 99)
+        let hours = total / 3_600
         let minutes = (total % 3_600) / 60
         let secs = total % 60
         return String(format: "%02d:%02d:%02d", hours, minutes, secs)

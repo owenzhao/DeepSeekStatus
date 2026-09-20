@@ -10,7 +10,7 @@
 [![Platform](https://img.shields.io/badge/platform-macOS%2014%2B-blue)](#requirements)
 [![Swift](https://img.shields.io/badge/Swift-5-orange)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![Network](https://img.shields.io/badge/network-opt--in-brightgreen)](#privacy)
+[![Network](https://img.shields.io/badge/network-limited-brightgreen)](#privacy)
 
 </div>
 
@@ -21,7 +21,7 @@ worth answering without opening a browser tab. DeepSeek Status answers it with a
 - 😴 **Off-peak hours** — a pale, sleepy whale lying on its side, with little `z`s floating above it.
 
 Click the whale to open a panel with the current period, the price multiplier, a live countdown to
-the next switch, a weekly schedule heat map, and — once you paste an API key — the balance left on
+the next switch, a monthly pricing calendar, a weekly schedule heat map, and — once you paste an API key — the balance left on
 your DeepSeek account. Optionally it can also show the countdown directly next to the menu bar icon.
 
 ---
@@ -54,6 +54,7 @@ Menu bar in both states and on different menu bar backgrounds:
 | Mon–Fri 14:00–18:00 | Peak | 100% |
 | Mon–Fri 18:00–09:00 (next day) | Off-peak | 50% |
 | Saturday and Sunday, all day | Off-peak | 50% |
+| Chinese public holidays, all day | Off-peak | 50% |
 
 Details:
 
@@ -61,7 +62,8 @@ Details:
   and 09:00 sharp is already peak.
 - The decision is **always made in Beijing time** (`Asia/Shanghai`, UTC+8, no daylight saving),
   regardless of your Mac's time zone. If your Mac is in a different time zone, the panel says so.
-- Only the weekday and the time of day are used. Chinese public holidays are **not** part of the rule.
+- Weekend make-up workdays remain off-peak all day. Weekdays included in the official Chinese
+  holiday schedule are also off-peak all day.
 
 ---
 
@@ -134,7 +136,7 @@ The panel contains:
 - the countdown to the next switch, plus how far through the current block you are;
 - **the account balance** once an API key is saved — total, plus the granted / topped-up split, a
   Refresh button and the time of the last successful refresh;
-- a 7×24 weekly heat map — blue = peak, gray = off-peak, with the current hour outlined;
+- a monthly pricing calendar for planning ahead, switchable to a 7×24 weekly heat map;
 - the toggles above, a preview picker, and the update controls.
 
 The panel closes when you click anywhere outside it, press <kbd>Esc</kbd>, or click the whale again.
@@ -143,8 +145,7 @@ The panel closes when you click anywhere outside it, press <kbd>Esc</kbd>, or cl
 
 ## Privacy
 
-The pricing panel needs no account, no key and no network — it reads your system clock and draws a
-whale. The app only talks to the network in two places, and the first one is strictly opt-in:
+The pricing panel needs no account or API key. The app talks to the network in three narrowly scoped places:
 
 - **Balance** (opt-in) — if you save a DeepSeek API key, the app calls
   `GET https://api.deepseek.com/user/balance` on launch, every 5 minutes, and when the panel opens or
@@ -152,20 +153,23 @@ whale. The app only talks to the network in two places, and the first one is str
   request. **With no key saved, no request is ever made.**
 - **Updates** — Sparkle reads the appcast from this repository's latest GitHub release (daily by
   default, switchable off in the panel).
+- **Holiday calendar** — at most once per day, the app anonymously checks Apple’s public China
+  holiday calendar. It sends no API key, device-calendar data or other user information, and uses
+  bundled/cached data while offline.
 
 There is **no analytics and no telemetry**. The API key lives in your **macOS Keychain** — the entry
 is encrypted by the system and readable after first unlock — never in a plain-text preferences file,
 and **Remove** in the panel deletes it. It is deliberately *not* wrapped in a second layer of
 home-made encryption: the key to that would have to sit in the same Keychain anyway, which buys
-nothing. The only other system state the app writes is the optional login item registration.
+nothing. The app also stores the normalized holiday cache and the optional login item registration.
 
 ---
 
 ## FAQ
 
 **Does it call the DeepSeek API or need an API key?**
-Only if you want the balance. The pricing side is a calendar, not a client — it reads the local clock
-and works with no key at all. If you paste a key into the panel, the app stores it in the Keychain and
+Only if you want the balance. Pricing works with no key: it reads the local clock and the public
+holiday schedule. If you paste a key into the panel, the app stores it in the Keychain and
 calls `GET /user/balance` to show what is left. That is the only DeepSeek endpoint it ever calls, and
 the balance is **account-wide**: every key of an account returns the same numbers.
 
@@ -185,7 +189,9 @@ Beijing time (`Asia/Shanghai`, UTC+8, no DST) always, no matter where your Mac i
 deliberate: the pricing schedule is defined in Beijing time.
 
 **Are Chinese public holidays handled?**
-No. The rule is weekday + time of day only.
+Yes. DeepSeek Status downloads Apple’s public China holiday calendar directly, without reading or
+modifying your Calendar app and without requesting calendar permission. Weekday holidays and
+weekend make-up workdays are shown in the monthly pricing calendar.
 
 **Why is the menu bar whale not animated?**
 On purpose. `NSStatusItem` continuously re-snapshots any custom view placed in it, which costs
@@ -224,8 +230,8 @@ the machine is back.
 - The menu bar icon is rasterized **once** into a 46×22 `NSImage` and handed to
   `NSStatusItem.button.image`.
 - The panel is a self-positioned `NSPanel` (not `NSPopover`), so it can never be pushed off-screen.
-- The schedule is computed from a fixed `Asia/Shanghai` calendar with half-open intervals; the app
-  refreshes once per second and also on clock changes, day changes and wake from sleep.
+- The schedule is computed from a fixed `Asia/Shanghai` calendar with half-open intervals and the
+  cached Chinese public-holiday schedule; the app refreshes on clock changes, day changes and wake.
 - The balance is one `GET /user/balance` call carrying the key from the Keychain. Responses carry a
   token, so a reply that arrives after you have already saved a different key is discarded instead of
   overwriting the new key's state.

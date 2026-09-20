@@ -8,6 +8,9 @@ import SwiftUI
 @MainActor
 final class PricingStore: ObservableObject {
 
+    /// Apple 中国大陆节假日订阅解析出的计费日历。
+    @Published private(set) var holidaySchedule: HolidaySchedule
+
     /// 当前时刻的时段快照。
     @Published private(set) var snapshot: PricingSnapshot
 
@@ -44,15 +47,25 @@ final class PricingStore: ObservableObject {
 
     private enum Keys {
         static let showsCountdown = "showsCountdownInMenuBar"
+        static let holidayETag = "holidayScheduleETag"
+        static let holidayLastChecked = "holidayScheduleLastChecked"
     }
+
+    static let holidayRefreshInterval: TimeInterval = 24 * 60 * 60
+    static let holidayCalendarURL = URL(string: "https://calendars.icloud.com/holidays/cn_zh.ics")!
 
     private let defaults: UserDefaults
     private var timer: Timer?
     private var observers: [NSObjectProtocol] = []
+    private var isRefreshingHolidaySchedule = false
 
-    init(defaults: UserDefaults = .standard, now: Date = Date()) {
+    init(defaults: UserDefaults = .standard,
+         now: Date = Date(),
+         holidaySchedule suppliedSchedule: HolidaySchedule? = nil) {
         self.defaults = defaults
-        self.snapshot = PricingSnapshot(now: now)
+        let schedule = suppliedSchedule ?? Self.loadCachedSchedule() ?? .bundled
+        self.holidaySchedule = schedule
+        self.snapshot = PricingSnapshot(now: now, schedule: schedule)
         self.showsCountdownInMenuBar = defaults.bool(forKey: Keys.showsCountdown)
         self.launchAtLogin = LaunchAtLogin.isEnabled
     }
@@ -76,14 +89,85 @@ final class PricingStore: ObservableObject {
         self.timer = timer
         installObservers()
         refresh()
+        refreshHolidayScheduleIfNeeded()
     }
 
     /// 立即按当前时间重新计算。
     func refresh() {
-        let next = PricingSnapshot(now: Date())
+        let next = PricingSnapshot(now: Date(), schedule: holidaySchedule)
         if next != snapshot {
             snapshot = next
         }
+    }
+
+    /// Apple 的节假日安排每天最多检查一次。失败时继续使用当前有效数据。
+    func refreshHolidayScheduleIfNeeded() {
+        guard !isRefreshingHolidaySchedule else { return }
+        if let lastChecked = defaults.object(forKey: Keys.holidayLastChecked) as? Date,
+           Date().timeIntervalSince(lastChecked) < Self.holidayRefreshInterval {
+            return
+        }
+        isRefreshingHolidaySchedule = true
+        Task { await refreshHolidaySchedule() }
+    }
+
+    private func refreshHolidaySchedule() async {
+        var request = URLRequest(url: Self.holidayCalendarURL)
+        request.timeoutInterval = 20
+        if let etag = defaults.string(forKey: Keys.holidayETag) {
+            request.setValue(etag, forHTTPHeaderField: "If-None-Match")
+        }
+
+        defer { isRefreshingHolidaySchedule = false }
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard let http = response as? HTTPURLResponse else { return }
+            if http.statusCode == 304 {
+                defaults.set(Date(), forKey: Keys.holidayLastChecked)
+                return
+            }
+            guard http.statusCode == 200 else { return }
+
+            let parsed = try HolidaySchedule.parseICS(data)
+            // 临时返回旧数据或不完整数据时，不倒退已经覆盖的年份。
+            if let currentYear = holidaySchedule.newestCoveredYear,
+               let receivedYear = parsed.newestCoveredYear,
+               receivedYear < currentYear {
+                return
+            }
+
+            try Self.saveCachedSchedule(parsed)
+            holidaySchedule = parsed
+            if let etag = http.value(forHTTPHeaderField: "ETag") {
+                defaults.set(etag, forKey: Keys.holidayETag)
+            }
+            defaults.set(Date(), forKey: Keys.holidayLastChecked)
+            refresh()
+        } catch {
+            // 网络、解析或落盘失败都保留已经生效的数据；下次启动/唤醒后仍会重试。
+        }
+    }
+
+    private static var holidayCacheURL: URL? {
+        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?
+            .appendingPathComponent("com.parussoft.DeepSeekStatus", isDirectory: true)
+            .appendingPathComponent("holiday-schedule.json")
+    }
+
+    private static func loadCachedSchedule() -> HolidaySchedule? {
+        guard let url = holidayCacheURL,
+              let data = try? Data(contentsOf: url),
+              let schedule = try? JSONDecoder().decode(HolidaySchedule.self, from: data),
+              schedule.newestCoveredYear != nil else { return nil }
+        return schedule
+    }
+
+    private static func saveCachedSchedule(_ schedule: HolidaySchedule) throws {
+        guard let url = holidayCacheURL else { return }
+        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(),
+                                                withIntermediateDirectories: true)
+        let data = try JSONEncoder().encode(schedule)
+        try data.write(to: url, options: .atomic)
     }
 
     private func installObservers() {
@@ -96,7 +180,10 @@ final class PricingStore: ObservableObject {
         ]
         for name in names {
             let token = center.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
-                MainActor.assumeIsolated { self?.refresh() }
+                MainActor.assumeIsolated {
+                    self?.refresh()
+                    self?.refreshHolidayScheduleIfNeeded()
+                }
             }
             observers.append(token)
         }
@@ -104,7 +191,10 @@ final class PricingStore: ObservableObject {
         let wakeToken = NSWorkspace.shared.notificationCenter.addObserver(
             forName: NSWorkspace.didWakeNotification, object: nil, queue: .main
         ) { [weak self] _ in
-            MainActor.assumeIsolated { self?.refresh() }
+            MainActor.assumeIsolated {
+                self?.refresh()
+                self?.refreshHolidayScheduleIfNeeded()
+            }
         }
         observers.append(wakeToken)
     }
