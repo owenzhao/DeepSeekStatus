@@ -321,6 +321,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     ///
     /// 窗口位置完全由我们自己算（`panelOrigin`），而不是交给 `NSPopover` 去猜，
     /// 所以不会再出现「弹窗被顶到屏幕外面、只剩半截」的情况。
+    ///
+    /// 收起时会把 `NSHostingView` 从窗口上摘掉（见 `hidePanel`），因此这里每次重新装内容，
+    /// 并重新按当前屏幕量一次高度。
     private func showPanel(relativeTo sender: NSStatusBarButton) {
         guard let screen = sender.window?.screen ?? NSScreen.main else { return }
 
@@ -332,27 +335,30 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // 注意：这里必须直接建 `NSHostingView` 来量尺寸。
         // `NSHostingController.view` 在第一次布局之前 `fittingSize` 是 0，
         // 用它算出来的窗口高度会是 0，面板就整个消失了。
-        let makeContent: (CGFloat?) -> StatusPanelContent = { limit in
-            StatusPanelContent(store: self.store,
-                               onQuit: { NSApp.terminate(nil) },
-                               balance: self.balance,
-                               maxHeight: limit,
-                               visibility: self.panelVisibility,
-                               automaticallyChecksForUpdates: self.autoCheckBinding,
-                               onCheckForUpdates: { self.checkForUpdates() })
-        }
-        let contentView = NSHostingView(rootView: makeContent(nil))
-        contentView.frame = NSRect(x: 0, y: 0, width: PopoverView.width, height: 100)
-        var size = CGSize(width: PopoverView.width, height: ceil(contentView.fittingSize.height))
-        if size.height > available {
-            contentView.rootView = makeContent(available)
-            size.height = available
-        }
-        size.height = max(size.height, 120)
+        let hosted = NSHostingView(rootView: makeContent(nil))
+        hosted.frame = NSRect(x: 0, y: 0, width: PopoverView.width, height: 100)
+        let naturalWidth = ceil(hosted.fittingSize.width)
+        let naturalHeight = ceil(hosted.fittingSize.height)
 
         let panel = self.panel ?? StatusPanel()
         self.panel = panel
-        panel.contentView = contentView
+
+        var size = CGSize(width: naturalWidth, height: naturalHeight)
+        if naturalHeight > available {
+            // 退化成可滚动：内容会换成「先按可用高度量出宽度」的那一版。
+            // 宽度测量必须带上最终宽度，否则量到的是没有约束的宽度（实测会多出十几点），
+            // 滚动条和右侧内容就会被挤出去。
+            hosted.frame = NSRect(x: 0, y: 0, width: naturalWidth, height: available)
+            let measured = hosted.fittingSize
+            let contentWidth = ceil(measured.width)
+            hosted.frame = NSRect(x: 0, y: 0, width: contentWidth, height: available)
+            hosted.rootView = makeContent(available)
+            size = CGSize(width: contentWidth, height: max(available, 120))
+        } else {
+            size.height = max(size.height, 120)
+        }
+
+        panel.contentView = hosted
         panel.setContentSize(size)
         panel.setFrameOrigin(panelOrigin(for: size, button: sender, screen: screen))
 
@@ -382,11 +388,29 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    /// 收起面板。
+    ///
+    /// 除了把窗口移出屏幕，还要把 `NSHostingView` 从窗口上摘掉：窗口离屏并不会让 SwiftUI
+    /// 停止工作，只要视图树还挂在窗口上，`PricingStore` 每秒发布的快照都会让这一整棵树
+    /// （953pt 高、带 `ScrollView`）重新求值一次 —— 实测常驻 2~3% CPU。
+    /// 摘掉之后同样是 0.1%，代价只是每次重新打开要多装一遍内容。
     private func hidePanel() {
         removePanelDismissMonitors()
         panel?.orderOut(nil)
-        // 窗口离屏之后再把水族箱的动画摘掉：`orderOut` 本身不会让 `TimelineView` 停下来。
+        // 先让动画停下来，再摘视图树；两步都要，缺一不可。
         panelVisibility.isVisible = false
+        panel?.contentView = NSView()
+    }
+
+    /// 构建面板内容的工厂。收起面板后 `NSHostingView` 会被摘掉，重新打开时用它重建。
+    private func makeContent(_ limit: CGFloat?) -> StatusPanelContent {
+        StatusPanelContent(store: store,
+                           onQuit: { NSApp.terminate(nil) },
+                           balance: balance,
+                           maxHeight: limit,
+                           visibility: panelVisibility,
+                           automaticallyChecksForUpdates: autoCheckBinding,
+                           onCheckForUpdates: { self.checkForUpdates() })
     }
 
     /// 计算面板左上角应该落在哪里：居中贴在菜单栏图标下方，并夹在屏幕可见区域内。
