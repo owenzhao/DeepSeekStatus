@@ -10,6 +10,10 @@ struct PopoverView: View {
     var onQuit: () -> Void
     /// 账户余额（含 API Key 的输入 / 更换）。由 AppDelegate 创建并统一驱动刷新。
     @ObservedObject var balance: BalanceStore
+    /// 面板是否显示在屏幕上；收起时水族箱会卸掉动画（详见 `AquariumView`）。
+    var isVisible: Bool = true
+    /// 固定水族箱的绘制时刻（离屏快照用；`nil` 表示播放动画）。
+    var fixedAquariumTime: TimeInterval?
     /// 自动检查更新开关 + 手动检查回调。
     /// 刻意用 `Binding` / 闭包而不是直接引用 Sparkle，离屏渲染工具才能不链接 Sparkle 编译这些视图。
     var automaticallyChecksForUpdates: Binding<Bool> = .constant(false)
@@ -20,7 +24,8 @@ struct PopoverView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            AquariumView(period: period, now: snapshot.now)
+            AquariumView(period: period, now: snapshot.now, isVisible: isVisible,
+                         fixedTime: fixedAquariumTime)
             if store.isPreviewing {
                 previewBanner
             }

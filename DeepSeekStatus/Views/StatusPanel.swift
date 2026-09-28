@@ -45,6 +45,16 @@ final class StatusPanel: NSPanel {
     override var canBecomeMain: Bool { false }
 }
 
+/// 面板的可见性状态。
+///
+/// 单独做成一个可观察对象而不是一个 `Bool` 参数：收起面板走的是 `orderOut`，
+/// 视图树并不会重建，只有可观察属性变化才能在那一刻把动画摘掉。
+/// 详见 `AquariumView.isVisible`。
+@MainActor
+final class PanelVisibility: ObservableObject {
+    @Published var isVisible = false
+}
+
 /// 面板里承载的 SwiftUI 内容。
 ///
 /// `maxHeight` 为 nil 时按内容的自然高度显示；屏幕放不下时传入可用高度，
@@ -54,6 +64,14 @@ struct StatusPanelContent: View {
     var onQuit: () -> Void
     @ObservedObject var balance: BalanceStore
     var maxHeight: CGFloat?
+    /// 面板当前是否真的显示在屏幕上。
+    ///
+    /// 收起面板用的是 `orderOut`，窗口和整棵 SwiftUI 视图树都还在；`TimelineView` 一旦跑起来，
+    /// 窗口离屏并不会让它停下来 —— 实测收起后水族箱仍在 30fps 重绘，CPU 11% 左右，
+    /// 比面板打开时还显眼。所以这里必须显式把可见性传进视图，由它决定是否挂上动画。
+    @ObservedObject var visibility: PanelVisibility
+    /// 固定水族箱的绘制时刻（离屏快照用；`nil` 表示播放动画）。
+    var fixedAquariumTime: TimeInterval?
     /// 自动检查更新开关与手动检查回调。界面层只用 `Binding`，不直接依赖 Sparkle。
     var automaticallyChecksForUpdates: Binding<Bool> = .constant(false)
     var onCheckForUpdates: () -> Void = {}
@@ -62,6 +80,8 @@ struct StatusPanelContent: View {
         PopoverView(store: store,
                     onQuit: onQuit,
                     balance: balance,
+                    isVisible: visibility.isVisible,
+                    fixedAquariumTime: fixedAquariumTime,
                     automaticallyChecksForUpdates: automaticallyChecksForUpdates,
                     onCheckForUpdates: onCheckForUpdates)
     }

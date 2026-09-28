@@ -31,6 +31,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var cancellables = Set<AnyCancellable>()
     /// 上一次渲染到菜单栏的内容，用来避免每秒无意义的重复设置。
     private var renderedKey: String?
+    /// 面板可见性。收起时要让水族箱卸掉动画，否则 `orderOut` 之后 `TimelineView`
+    /// 依旧按 30fps 重绘，CPU 反而比打开时更高（见 `AquariumView`）。
+    private let panelVisibility = PanelVisibility()
 
     // MARK: - 生命周期
 
@@ -49,7 +52,68 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         observeStore()
         renderMenuBar()
         runDiagnosticsIfRequested()
+        runHiddenProbeIfRequested()
         runUpdateCheckIfRequested()
+    }
+
+    /// 开发用：`DEEPSEEK_STATUS_HIDDEN_PROBE=<秒>` 每隔 2 秒打印一次画布重绘帧数与这一段
+    /// 的实测 CPU 占用，用来确认「面板收起时动画是否真的停了」。
+    /// 第 6 秒自动展开面板、第 14 秒收起，所以一次运行就能对比可见 / 不可见两段。
+    /// 只在带这个环境变量时生效，正常启动完全不受影响。
+    private func runHiddenProbeIfRequested() {
+        guard let raw = ProcessInfo.processInfo.environment["DEEPSEEK_STATUS_HIDDEN_PROBE"],
+              let lifetime = TimeInterval(raw) else { return }
+        print("[探针] 开始，模式=\(raw)，观察画布重绘与 CPU")
+        var last = WhaleRenderStats.frames
+        var lastCPU = Self.cpuTimeSeconds()
+        var elapsed: TimeInterval = 0
+
+        @MainActor func tick() {
+            let frameCount = WhaleRenderStats.frames
+            let seconds = min(2, lifetime - elapsed)
+            let cpu = Self.cpuTimeSeconds()
+            // 进程累计 CPU 时间在窗口内的增量，就是这一段最准的 CPU 占用。
+            let percent = (cpu - lastCPU) / max(seconds, 0.001) * 100
+            lastCPU = cpu
+            let fps = Double(frameCount - last) / max(seconds, 0.001)
+            print("[探针] t=\(Int(elapsed))s 鲸鱼重绘 \(frameCount - last) 帧 ≈ \(String(format: "%.1f", fps)) fps"
+                  + " CPU=\(String(format: "%.1f", percent))% 面板可见=\(panel?.isVisible ?? false)")
+            last = frameCount
+            elapsed += 2
+
+            guard elapsed < lifetime else {
+                hidePanel()
+                NSApp.terminate(nil)
+                return
+            }
+            if elapsed == 6, let button = statusItem?.button {
+                print("[探针] → 显示面板")
+                togglePanel(button)
+            }
+            if elapsed == 14 {
+                print("[探针] → 收起面板")
+                hidePanel()
+            }
+            Task { @MainActor in
+                try? await Task.sleep(for: .seconds(2))
+                tick()
+            }
+        }
+
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(2))
+            tick()
+        }
+    }
+
+    /// 进程（含所有线程）累计消耗的 CPU 秒数。
+    private static func cpuTimeSeconds() -> Double {
+        var usage = rusage()
+        guard getrusage(RUSAGE_SELF, &usage) == 0 else { return 0 }
+        func seconds(_ value: timeval) -> Double {
+            Double(value.tv_sec) + Double(value.tv_usec) / 1_000_000
+        }
+        return seconds(usage.ru_utime) + seconds(usage.ru_stime)
     }
 
     /// 开发用：`DEEPSEEK_STATUS_CHECK_UPDATES=1` 启动后立刻手动检查一次更新，
@@ -273,6 +337,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                                onQuit: { NSApp.terminate(nil) },
                                balance: self.balance,
                                maxHeight: limit,
+                               visibility: self.panelVisibility,
                                automaticallyChecksForUpdates: self.autoCheckBinding,
                                onCheckForUpdates: { self.checkForUpdates() })
         }
@@ -295,6 +360,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.activate(ignoringOtherApps: true)
         panel.alphaValue = 0
         panel.makeKeyAndOrderFront(nil)
+        // 先让窗口上屏，再放开水族箱的动画，避免出现「窗口在淡入、内容还是空底色」的一帧。
+        panelVisibility.isVisible = true
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.14
             panel.animator().alphaValue = 1
@@ -318,6 +385,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func hidePanel() {
         removePanelDismissMonitors()
         panel?.orderOut(nil)
+        // 窗口离屏之后再把水族箱的动画摘掉：`orderOut` 本身不会让 `TimelineView` 停下来。
+        panelVisibility.isVisible = false
     }
 
     /// 计算面板左上角应该落在哪里：居中贴在菜单栏图标下方，并夹在屏幕可见区域内。

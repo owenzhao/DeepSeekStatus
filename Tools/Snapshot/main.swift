@@ -186,9 +186,10 @@ func renderPreviewSet() {
     .background(WhaleTheme.tankBottomSleep)
     render(sleepGrid, size: CGSize(width: 136, height: 4 * 46 + 16), scale: 2, name: "sleep-phases")
 
-    // 5. 水族箱
+    // 5. 水族箱。固定一个时刻，否则 `TimelineView` 在离屏渲染里是一张空画布。
+    let aquariumTime = Date(timeIntervalSinceReferenceDate: 12.5).timeIntervalSinceReferenceDate
     for period in PricePeriod.allCases {
-        render(AquariumView(period: period, now: now),
+        render(AquariumView(period: period, now: now, fixedTime: aquariumTime),
                size: CGSize(width: 320, height: 152), scale: 2,
                name: "aquarium-\(period.rawValue)")
     }
@@ -202,7 +203,8 @@ func renderPreviewSet() {
     for period in PricePeriod.allCases {
         let store = PricingStore(now: now, holidaySchedule: .bundled)
         store.previewPeriod = period
-        renderNatural(PopoverView(store: store, onQuit: {}, balance: .preview())
+        renderNatural(PopoverView(store: store, onQuit: {}, balance: .preview(),
+                                  fixedAquariumTime: aquariumTime)
                         .background(Color(nsColor: .windowBackgroundColor)),
                       width: 320, scale: 2,
                       name: "popover-\(period.rawValue)")
@@ -213,7 +215,8 @@ func renderPreviewSet() {
                             ("popover-key-invalid", BalanceStore.preview(state: .failed(.unauthorized)))] {
         let store = PricingStore(now: now, holidaySchedule: .bundled)
         store.previewPeriod = .peak
-        renderNatural(PopoverView(store: store, onQuit: {}, balance: balance)
+        renderNatural(PopoverView(store: store, onQuit: {}, balance: balance,
+                                  fixedAquariumTime: aquariumTime)
                         .background(Color(nsColor: .windowBackgroundColor)),
                       width: 320, scale: 2,
                       name: name)

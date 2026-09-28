@@ -17,33 +17,48 @@ struct WhaleStage: View {
     var showsSleepMarks: Bool = true
     /// 重绘帧率；`nil` 时按状态取默认值（游泳 20fps、睡觉 12fps）。
     var frameRate: Double?
+    /// 固定时刻（`nil` 表示播放动画）。
+    ///
+    /// 离屏快照必须走这条路：`ImageRenderer` 渲染 `TimelineView` 时拿到的是空画布，
+    /// 所以预览图要么是空白的，要么随机器负载每次都不一样。
+    var fixedTime: TimeInterval?
 
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
-        // 用 `.periodic` 而不是 `.animation`：`.animation` 会按屏幕刷新率驱动（实测 60fps），
-        // `.periodic` 才能真正把帧率压下来。
-        TimelineView(.periodic(from: Date(timeIntervalSinceReferenceDate: 0),
-                               by: 1.0 / (frameRate ?? Self.defaultFrameRate(for: period)))) { timeline in
-            Canvas(opaque: false, rendersAsynchronously: false) { context, canvasSize in
-                var canvas = context
-                canvas.clip(to: Path(CGRect(origin: .zero, size: canvasSize)))
-                WhaleScene.draw(
-                    in: &canvas,
-                    size: canvasSize,
-                    time: timeline.date.timeIntervalSinceReferenceDate,
-                    period: period,
-                    whaleWidth: whaleWidth ?? Self.defaultWhaleWidth(for: canvasSize),
-                    palette: palette ?? .menuBar(for: period, dark: colorScheme == .dark),
-                    showsBubbles: showsBubbles,
-                    showsSleepMarks: showsSleepMarks
-                )
+        Group {
+            if let fixedTime {
+                canvas(at: fixedTime)
+            } else {
+                // 用 `.periodic` 而不是 `.animation`：`.animation` 会按屏幕刷新率驱动（实测 60fps），
+                // `.periodic` 才能真正把帧率压下来。
+                TimelineView(.periodic(from: Date(timeIntervalSinceReferenceDate: 0),
+                                       by: 1.0 / (frameRate ?? Self.defaultFrameRate(for: period)))) { timeline in
+                    canvas(at: timeline.date.timeIntervalSinceReferenceDate)
+                }
             }
         }
         .frame(width: size?.width, height: size?.height)
         .frame(maxWidth: size == nil ? .infinity : nil,
                maxHeight: size == nil ? .infinity : nil)
         .accessibilityLabel(period.title)
+    }
+
+    private func canvas(at time: TimeInterval) -> some View {
+        Canvas(opaque: false, rendersAsynchronously: false) { context, canvasSize in
+            var canvas = context
+            canvas.clip(to: Path(CGRect(origin: .zero, size: canvasSize)))
+            WhaleScene.draw(
+                in: &canvas,
+                size: canvasSize,
+                time: time,
+                period: period,
+                whaleWidth: whaleWidth ?? Self.defaultWhaleWidth(for: canvasSize),
+                palette: palette ?? .menuBar(for: period, dark: colorScheme == .dark),
+                showsBubbles: showsBubbles,
+                showsSleepMarks: showsSleepMarks
+            )
+        }
     }
 
     /// 默认帧率：游泳的动作幅度大，给 20fps；睡觉只有细微呼吸，12fps 就够。
