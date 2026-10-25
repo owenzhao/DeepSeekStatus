@@ -94,7 +94,7 @@ private struct PricingCalendarView: View {
                     Image(systemName: "exclamationmark.triangle.fill")
                 }
                 .font(.system(size: 9.5))
-                .foregroundStyle(.orange)
+                .foregroundStyle(WhaleTheme.peakAccent)
                 .fixedSize(horizontal: false, vertical: true)
             }
         }
@@ -136,7 +136,7 @@ private struct PricingCalendarView: View {
             ForEach(Array(PricingFormatter.veryShortWeekdaySymbolsMondayFirst.enumerated()), id: \.offset) { _, symbol in
                 Text(verbatim: symbol)
                     .font(.system(size: 9, weight: .medium))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(WhaleTheme.labelTint)
                     .frame(maxWidth: .infinity)
             }
         }
@@ -182,7 +182,7 @@ private struct PricingCalendarView: View {
             Spacer(minLength: 0)
         }
         .font(.system(size: 9.5))
-        .foregroundStyle(.secondary)
+        .foregroundStyle(WhaleTheme.labelTint)
     }
 
     private func legendItem(color: Color, title: String) -> some View {
@@ -199,7 +199,7 @@ private struct PricingCalendarView: View {
                 .font(.system(size: 10.5, weight: .semibold))
             Text(info.localizedDetail)
                 .font(.system(size: 10))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(WhaleTheme.labelTint)
                 .fixedSize(horizontal: false, vertical: true)
         }
     }

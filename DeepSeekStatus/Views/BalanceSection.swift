@@ -2,8 +2,12 @@ import SwiftUI
 
 /// 弹窗里的「账户余额」区块。
 ///
-/// - 没保存 Key 时，右上角按钮是「输入 API Key」；
-/// - 有 Key 时是「刷新」，按钮后面紧跟着最近一次刷新时间，再往后是「更换 API Key」；
+/// 卡片里有两个并列的服务商区块：DeepSeek 和 LithosAI。两家的排版完全一致
+/// （名称行 + 贴右边缘的控件 + 金额行，见 `BalanceProviderBlock`），中间用一条淡线分开；
+/// 卡片标题行只留「刷新」和最近一次刷新时间，两家共享。
+///
+/// - DeepSeek 的 API Key 入口挂在 DeepSeek 区块自己的名称行右侧（没 Key 时是「输入 API Key」，
+///   有 Key 时是「API Key」），和 LithosAI 的开关处在同一条视觉边线上；
 /// - 刷新失败（尤其是 Key 失效）时，除了报错文案还会一直给出「更换 API Key」的入口，
 ///   保证 Key 失效之后用户永远能换成新的。
 struct BalanceSection: View {
@@ -21,46 +25,51 @@ struct BalanceSection: View {
     }()
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: BalanceCardStyle.blockSpacing) {
             header
-            Text(verbatim: "DeepSeek")
-                .font(.system(size: 10.5, weight: .semibold))
-                .foregroundStyle(.secondary)
-            content
+
+            BalanceProviderBlock(name: "DeepSeek") {
+                keyAccessory
+            } content: {
+                deepSeekDetail
+            }
+
+            BalanceCardSeparator()
+
             LithosBalanceSection(store: lithos)
         }
-        .padding(10)
+        .padding(BalanceCardStyle.padding)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
+            RoundedRectangle(cornerRadius: BalanceCardStyle.cornerRadius, style: .continuous)
                 .fill(Color.primary.opacity(0.05))
         )
     }
 
-    // MARK: - 标题行（余额 / 刷新按钮 / 刷新时间 / 更换 Key）
+    // MARK: - 标题行（余额 / 刷新时间 / 刷新）
 
+    /// 标题行只放两件事：卡片叫什么，以及这份数据是什么时候拉的。
+    /// 「更新于」和标题同色，只靠更小的字号往后退，读起来是「1:11 PM 更新过，现在可以再刷」。
     private var header: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: 8) {
             Text(String(localized: "balance.title", defaultValue: "Account balance"))
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundStyle(.secondary)
+                .font(BalanceCardStyle.titleFont)
+                .foregroundStyle(WhaleTheme.labelTint)
 
-            Spacer(minLength: 6)
+            Spacer(minLength: 8)
 
             if store.isEditingKey {
-                // 编辑中不摆刷新 / 更换入口，避免和编辑器里的「保存 / 取消」混在一起。
+                // 编辑中不摆刷新入口，避免和编辑器里的「保存 / 取消」混在一起。
                 EmptyView()
             } else if store.hasKey || lithos.enabled {
-                refreshButton
                 if let lastRefreshed = commonRefreshTime {
                     Text(refreshedLabel(lastRefreshed))
-                        .font(.system(size: 9.5))
-                        .foregroundStyle(.tertiary)
+                        .font(BalanceCardStyle.metaFont)
+                        .foregroundStyle(WhaleTheme.labelTint)
                         .monospacedDigit()
+                        .lineLimit(1)
                 }
-                if store.hasKey { changeKeyButton } else { enterKeyButton }
-            } else {
-                enterKeyButton
+                refreshButton
             }
         }
     }
@@ -84,7 +93,7 @@ struct BalanceSection: View {
             }
         }
         .buttonStyle(.link)
-        .font(.system(size: 10.5, weight: .semibold))
+        .font(BalanceCardStyle.actionFont)
         .disabled(store.isRefreshing || (lithos.enabled && lithos.isRefreshing))
     }
 
@@ -96,24 +105,33 @@ struct BalanceSection: View {
         return min(deepSeekTime, lithosTime)
     }
 
-    private var enterKeyButton: some View {
+    // MARK: - API Key 入口（DeepSeek 区块的名称行右侧）
+
+    /// 和 LithosAI 的开关处在同一条视觉边线上：名称行右端就是这个服务商的控件。
+    /// 刷新失败时不再放这里，因为失败文案下面已经有明文的「更换 API Key」。
+    @ViewBuilder
+    private var keyAccessory: some View {
+        if store.isEditingKey {
+            EmptyView()
+        } else if !store.hasKey {
+            keyLink(String(localized: "balance.enterKey", defaultValue: "Enter API Key"))
+        } else if case .failed = store.state {
+            EmptyView()
+        } else {
+            keyLink(String(localized: "balance.key.manage", defaultValue: "API Key"))
+        }
+    }
+
+    private func keyLink(_ title: String) -> some View {
         Button { store.beginEditingKey() } label: {
             HStack(spacing: 3) {
                 Image(systemName: "key")
                     .font(.system(size: 9.5, weight: .semibold))
-                Text(String(localized: "balance.enterKey", defaultValue: "Enter API Key"))
+                Text(title)
             }
         }
         .buttonStyle(.link)
-        .font(.system(size: 10.5, weight: .semibold))
-    }
-
-    private var changeKeyButton: some View {
-        Button { store.beginEditingKey() } label: {
-            Image(systemName: "key")
-                .font(.system(size: 9.5, weight: .semibold))
-        }
-        .buttonStyle(.link)
+        .font(BalanceCardStyle.actionFont)
         .help(String(localized: "balance.key.changeHelp",
                      defaultValue: "Change the saved API key"))
     }
@@ -121,7 +139,7 @@ struct BalanceSection: View {
     // MARK: - 内容
 
     @ViewBuilder
-    private var content: some View {
+    private var deepSeekDetail: some View {
         if store.isEditingKey {
             keyEditor
         } else {
@@ -129,8 +147,8 @@ struct BalanceSection: View {
             case .noKey:
                 Text(String(localized: "balance.noKey.hint",
                             defaultValue: "Add an API key to see your balance here."))
-                    .font(.system(size: 10.5))
-                    .foregroundStyle(.secondary)
+                    .font(BalanceCardStyle.messageFont)
+                    .foregroundStyle(WhaleTheme.labelTint)
                     .fixedSize(horizontal: false, vertical: true)
 
             case .loading:
@@ -140,8 +158,8 @@ struct BalanceSection: View {
                         .scaleEffect(0.55)
                         .frame(width: 10, height: 10)
                     Text(String(localized: "balance.loading", defaultValue: "Refreshing…"))
-                        .font(.system(size: 10.5))
-                        .foregroundStyle(.secondary)
+                        .font(BalanceCardStyle.messageFont)
+                        .foregroundStyle(WhaleTheme.labelTint)
                 }
 
             case .loaded(let balance):
@@ -160,17 +178,18 @@ struct BalanceSection: View {
         VStack(alignment: .leading, spacing: 6) {
             if balance.balanceInfos.isEmpty {
                 Text(String(localized: "balance.empty", defaultValue: "No balance information."))
-                    .font(.system(size: 10.5))
-                    .foregroundStyle(.secondary)
+                    .font(BalanceCardStyle.messageFont)
+                    .foregroundStyle(WhaleTheme.labelTint)
             } else {
                 ForEach(balance.balanceInfos) { info in
-                    VStack(alignment: .leading, spacing: 1) {
+                    VStack(alignment: .leading, spacing: 2) {
                         Text(verbatim: info.amount(info.totalBalance))
-                            .font(.system(size: 17, weight: .bold, design: .rounded))
+                            .font(BalanceCardStyle.amountFont)
+                            .foregroundStyle(WhaleTheme.contentTint)
                             .monospacedDigit()
                         Text(verbatim: breakdown(info))
-                            .font(.system(size: 10))
-                            .foregroundStyle(.secondary)
+                            .font(BalanceCardStyle.captionFont)
+                            .foregroundStyle(WhaleTheme.labelTint)
                             .monospacedDigit()
                     }
                 }
@@ -238,7 +257,7 @@ struct BalanceSection: View {
             Text(String(localized: "balance.key.hint",
                         defaultValue: "Create a key at platform.deepseek.com. It is stored in your Keychain."))
                 .font(.system(size: 9.5))
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(WhaleTheme.labelTint)
                 .fixedSize(horizontal: false, vertical: true)
 
             if let keyError = store.keyError {
@@ -263,7 +282,7 @@ struct BalanceSection: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.small)
-                .font(.system(size: 10.5, weight: .semibold))
+                .font(BalanceCardStyle.actionFont)
             }
         }
     }
@@ -277,8 +296,8 @@ struct BalanceSection: View {
                 .foregroundStyle(WhaleTheme.peakAccent)
                 .padding(.top, 1)
             Text(text)
-                .font(.system(size: 10))
-                .foregroundStyle(.secondary)
+                .font(BalanceCardStyle.captionFont)
+                .foregroundStyle(WhaleTheme.labelTint)
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
@@ -286,7 +305,7 @@ struct BalanceSection: View {
     private func linkButton(_ title: String, action: @escaping () -> Void) -> some View {
         Button(title, action: action)
             .buttonStyle(.link)
-            .font(.system(size: 10.5, weight: .semibold))
+            .font(BalanceCardStyle.actionFont)
     }
 
     /// 「更新于 14:32」。
@@ -298,6 +317,12 @@ struct BalanceSection: View {
 
 #Preview("余额 · 已加载") {
     BalanceSection(store: .preview(), lithos: .preview())
+        .padding(15)
+        .frame(width: PopoverView.width)
+}
+
+#Preview("余额 · 两家都开启") {
+    BalanceSection(store: .preview(), lithos: .preview(enabled: true, state: .loaded("$24.94")))
         .padding(15)
         .frame(width: PopoverView.width)
 }

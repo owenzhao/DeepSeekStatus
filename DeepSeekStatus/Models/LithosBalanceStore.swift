@@ -29,9 +29,20 @@ final class LithosBalanceStore: NSObject, ObservableObject, WKNavigationDelegate
     private var requestID = 0
     private var shouldAutomaticallySignIn = true
 
-    static func preview() -> LithosBalanceStore {
+    /// 离屏渲染 / SwiftUI 预览用。`hasSession` 传 `nil` 时按状态推断：有金额就算已登录。
+    static func preview(enabled: Bool = false,
+                        state: State = .signedOut,
+                        hasSession: Bool? = nil,
+                        lastRefreshed: Date? = Date()) -> LithosBalanceStore {
         let store = LithosBalanceStore()
-        store.enabled = false
+        store.enabled = enabled
+        store.state = state
+        if let hasSession {
+            store.hasSession = hasSession
+        } else if case .loaded = state {
+            store.hasSession = true
+        }
+        store.lastRefreshed = lastRefreshed
         return store
     }
 

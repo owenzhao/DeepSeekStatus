@@ -22,6 +22,23 @@ enum WhaleTheme {
     static let tankTopSleep = Color(red: 20 / 255, green: 26 / 255, blue: 48 / 255)
     static let tankBottomSleep = Color(red: 9 / 255, green: 12 / 255, blue: 24 / 255)
 
+    // MARK: - 文字
+
+    /// 界面文字只有三档语义色，所有视图都用这几个常量，不要再散着写 `.secondary` / `.tertiary`：
+    ///
+    /// - `contentTint`：真正的内容——标题、标签、数值；
+    /// - `labelTint`：所有说明性文字——副标题、单位、时间、脚注、状态文案；
+    /// - 可点的操作统一用系统链接蓝（`.buttonStyle(.link)`），不另外配色。
+    ///
+    /// 说明性文字刻意只有一档灰，不用更浅的 `.tertiary`：它靠更小的字号就已经退后了，
+    /// 再压一档灰度，同一块界面里就会出现深灰、浅灰、黑（和蓝）四五种深浅，看着花。
+    static let contentTint = Color.primary
+    static let labelTint = Color.secondary
+
+    /// 水族箱是深色画布，同一套层级换成白色：内容用纯白，说明性文字用这一档半透明白。
+    static let overlayContentTint = Color.white
+    static let overlayLabelTint = Color.white.opacity(0.6)
+
     static func accent(for period: PricePeriod) -> Color {
         period == .peak ? peakAccent : offPeakAccent
     }

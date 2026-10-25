@@ -150,7 +150,7 @@ struct AquariumView: View {
                 Spacer()
                 Text(String(localized: "aquarium.beijingTime", defaultValue: "Beijing time"))
                     .font(.system(size: 10, weight: .medium))
-                    .foregroundStyle(.white.opacity(0.55))
+                    .foregroundStyle(WhaleTheme.overlayLabelTint)
             }
             Spacer()
             HStack {
@@ -169,11 +169,11 @@ struct AquariumView: View {
                 .shadow(color: WhaleTheme.accent(for: period).opacity(0.9), radius: 3)
             Text(period.title)
                 .font(.system(size: 12.5, weight: .semibold))
-                .foregroundStyle(.white)
+                .foregroundStyle(WhaleTheme.overlayContentTint)
             Text(PricingFormatter.preciseTime(now))
                 .font(.system(size: 12.5, weight: .medium, design: .rounded))
                 .monospacedDigit()
-                .foregroundStyle(.white.opacity(0.7))
+                .foregroundStyle(WhaleTheme.overlayLabelTint)
         }
         .padding(.horizontal, 11)
         .padding(.vertical, 6)

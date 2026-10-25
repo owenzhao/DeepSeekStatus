@@ -81,7 +81,7 @@ struct PopoverView: View {
             }
             Text(headerDetail)
                 .font(.system(size: 11.5))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(WhaleTheme.labelTint)
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
@@ -124,7 +124,7 @@ struct PopoverView: View {
             HStack(spacing: 6) {
                 Image(systemName: "clock")
                     .font(.system(size: 11))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(WhaleTheme.labelTint)
                 Text(String(format: String(localized: "popover.countdown.title",
                                           defaultValue: "Time until “%@”"),
                             snapshot.nextPeriod.title))
@@ -139,7 +139,7 @@ struct PopoverView: View {
                         PricingFormatter.transitionDescription(snapshot.nextTransition, relativeTo: snapshot.now),
                         snapshot.nextPeriod.title))
                 .font(.system(size: 10.5))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(WhaleTheme.labelTint)
             // 当前时段的进度：自定义细条比 ProgressView 更紧凑。
             GeometryReader { geometry in
                 ZStack(alignment: .leading) {
@@ -165,7 +165,7 @@ struct PopoverView: View {
         VStack(alignment: .leading, spacing: 6) {
             Text(String(localized: "popover.schedule.title", defaultValue: "Schedule rules"))
                 .font(.system(size: 11, weight: .semibold))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(WhaleTheme.labelTint)
 
             ruleRow(color: WhaleTheme.brandBlue,
                     title: PricePeriod.peak.shortTitle,
@@ -180,7 +180,7 @@ struct PopoverView: View {
 
             Text(footnote)
                 .font(.system(size: 9.5))
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(WhaleTheme.labelTint)
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
@@ -209,7 +209,7 @@ struct PopoverView: View {
                 .frame(width: Self.ruleLabelWidth, alignment: .leading)
             Text(detail)
                 .font(.system(size: 11))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(WhaleTheme.labelTint)
                 .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 0)
         }
@@ -240,7 +240,7 @@ struct PopoverView: View {
             if let message = store.launchAtLoginMessage {
                 Text(message)
                     .font(.system(size: 9.5))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(WhaleTheme.labelTint)
                     .fixedSize(horizontal: false, vertical: true)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -302,7 +302,7 @@ struct PopoverView: View {
         HStack(alignment: .center, spacing: 8) {
             Text(Self.versionText)
                 .font(.system(size: 9.5))
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(WhaleTheme.labelTint)
             Spacer()
             Button(String(localized: "popover.quit", defaultValue: "Quit")) { onQuit() }
                 .buttonStyle(.link)

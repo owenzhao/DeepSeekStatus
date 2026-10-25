@@ -3,6 +3,7 @@
 #
 #   ./Tools/render-preview.sh            # 渲染 Preview/*.png
 #   ./Tools/render-preview.sh icons      # 渲染 Preview/AppIcon/*.png（App 图标源图）
+#   ./Tools/render-preview.sh balance    # 渲染账户余额卡片的几种状态（走 AppKit，按钮是真实样式）
 #
 # 说明：xcodebuild / swiftc 需要可写的模块缓存目录，这里统一放在项目内的 Build/ 下，
 # 避免依赖系统临时目录（在某些沙盒环境下系统临时目录不可写）。

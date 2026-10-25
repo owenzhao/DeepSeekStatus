@@ -58,6 +58,41 @@ func renderNatural(_ view: some View, width: CGFloat, scale: CGFloat = 2, name: 
     write(image, named: name)
 }
 
+/// 经过 AppKit 的 `NSHostingView` 渲染，而不是 `ImageRenderer`。
+///
+/// `ImageRenderer` 画不了 AppKit 托管的控件：按钮、开关、输入框会变成一块黄色的「不支持」占位，
+/// 所以光靠它看不出按钮文案的排版。这里把视图塞进一个不显示的窗口里再截图，
+/// 控件就是真实的样子，适合检查带按钮的区域（比如账户余额卡片）。
+@MainActor
+func renderHosted(_ view: some View, width: CGFloat, scale: CGFloat = 3,
+                  scheme: ColorScheme? = nil, name: String) {
+    let hosting = NSHostingView(rootView: view.frame(width: width))
+    hosting.frame = NSRect(origin: .zero, size: hosting.fittingSize)
+    let window = NSWindow(contentRect: hosting.frame, styleMask: [.borderless],
+                          backing: .buffered, defer: false)
+    window.isReleasedWhenClosed = false
+    if let scheme {
+        window.appearance = NSAppearance(named: scheme == .dark ? .darkAqua : .aqua)
+    }
+    window.contentView = hosting
+    hosting.layoutSubtreeIfNeeded()
+    window.displayIfNeeded()
+
+    let bounds = hosting.bounds
+    guard let rep = NSBitmapImageRep(bitmapDataPlanes: nil,
+                                     pixelsWide: Int((bounds.width * scale).rounded()),
+                                     pixelsHigh: Int((bounds.height * scale).rounded()),
+                                     bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true,
+                                     isPlanar: false, colorSpaceName: .deviceRGB,
+                                     bytesPerRow: 0, bitsPerPixel: 0) else {
+        print("❌ 无法创建位图 \(name)")
+        return
+    }
+    rep.size = bounds.size
+    hosting.cacheDisplay(in: bounds, to: rep)
+    write(rep.cgImage!, named: name)
+}
+
 // MARK: - 固定时刻的舞台（用于查看动画的不同瞬间）
 
 struct StaticStage: View {
@@ -451,6 +486,36 @@ func checkSchedule() {
     print(failures == 0 ? "\n全部通过 ✅" : "\n失败 \(failures) 项 ❌")
 }
 
+// MARK: - 账户余额卡片（走 AppKit，能看到真实按钮）
+
+@MainActor
+func renderBalanceCards() {
+    let cases: [(String, BalanceStore, LithosBalanceStore)] = [
+        ("balance-both", .preview(), .preview(enabled: true, state: .loaded("$24.94"))),
+        ("balance-deepseek-only", .preview(), .preview()),
+        ("balance-no-key", .preview(state: .noKey, hasKey: false, lastRefreshed: nil), .preview()),
+        ("balance-failed", .preview(state: .failed(.unauthorized)),
+         .preview(enabled: true, state: .failed("Sign in to LithosAI."), lastRefreshed: nil)),
+        ("balance-key-editor", {
+            let store = BalanceStore.preview()
+            store.beginEditingKey()
+            return store
+        }(), .preview()),
+    ]
+    for (name, balance, lithos) in cases {
+        renderHosted(BalanceSection(store: balance, lithos: lithos)
+                        .padding(15)
+                        .background(Color(nsColor: .windowBackgroundColor)),
+                     width: 320, name: name)
+    }
+
+    // 深色模式下再看一遍：卡片底色、分隔线都是按 primary 的透明度叠出来的，要确认还看得清。
+    renderHosted(BalanceSection(store: .preview(), lithos: .preview(enabled: true, state: .loaded("$24.94")))
+                    .padding(15)
+                    .background(Color(nsColor: .windowBackgroundColor)),
+                 width: 320, scheme: .dark, name: "balance-both-dark")
+}
+
 // MARK: - 入口
 
 MainActor.assumeIsolated {
@@ -463,6 +528,8 @@ MainActor.assumeIsolated {
         checkSchedule()
     case "candidates":
         renderColorCandidates()
+    case "balance":
+        renderBalanceCards()
     default:
         renderPreviewSet()
     }

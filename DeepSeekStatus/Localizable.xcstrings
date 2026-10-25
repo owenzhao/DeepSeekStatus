@@ -172,7 +172,7 @@
       }
     },
     "balance.key.changeHelp" : {
-      "comment" : "Tooltip of the small key button in the balance header.",
+      "comment" : "Tooltip of the API key link at the right edge of the DeepSeek row.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -218,6 +218,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "在 platform.deepseek.com 创建，Key 会保存到系统钥匙串。"
+          }
+        }
+      }
+    },
+    "balance.key.manage" : {
+      "comment" : "Link at the right edge of the DeepSeek row in the balance card; opens the API key editor.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "API Key"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "API Key"
           }
         }
       }
