@@ -203,7 +203,7 @@ func renderPreviewSet() {
     for period in PricePeriod.allCases {
         let store = PricingStore(now: now, holidaySchedule: .bundled)
         store.previewPeriod = period
-        renderNatural(PopoverView(store: store, onQuit: {}, balance: .preview(),
+        renderNatural(PopoverView(store: store, onQuit: {}, balance: .preview(), lithosBalance: .preview(),
                                   fixedAquariumTime: aquariumTime)
                         .background(Color(nsColor: .windowBackgroundColor)),
                       width: 320, scale: 2,
@@ -215,7 +215,7 @@ func renderPreviewSet() {
                             ("popover-key-invalid", BalanceStore.preview(state: .failed(.unauthorized)))] {
         let store = PricingStore(now: now, holidaySchedule: .bundled)
         store.previewPeriod = .peak
-        renderNatural(PopoverView(store: store, onQuit: {}, balance: balance,
+        renderNatural(PopoverView(store: store, onQuit: {}, balance: balance, lithosBalance: .preview(),
                                   fixedAquariumTime: aquariumTime)
                         .background(Color(nsColor: .windowBackgroundColor)),
                       width: 320, scale: 2,
@@ -332,7 +332,7 @@ func measure() {
     for period in PricePeriod.allCases {
         let store = PricingStore(now: now, holidaySchedule: .bundled)
         store.previewPeriod = period
-        let hosting = NSHostingView(rootView: PopoverView(store: store, onQuit: {}, balance: .preview()))
+        let hosting = NSHostingView(rootView: PopoverView(store: store, onQuit: {}, balance: .preview(), lithosBalance: .preview()))
         print("弹窗 \(period.title): \(hosting.fittingSize)")
     }
     let aquarium = NSHostingView(rootView: AquariumView(period: .peak, now: now))

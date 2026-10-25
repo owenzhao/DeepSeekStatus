@@ -9,6 +9,7 @@ import SwiftUI
 struct BalanceSection: View {
 
     @ObservedObject var store: BalanceStore
+    @ObservedObject var lithos: LithosBalanceStore
 
     /// 刷新时间的格式化：跟随界面语言，用本地时区（这是用户自己的操作时刻）。
     private static let timeFormatter: DateFormatter = {
@@ -22,7 +23,11 @@ struct BalanceSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             header
+            Text(verbatim: "DeepSeek")
+                .font(.system(size: 10.5, weight: .semibold))
+                .foregroundStyle(.secondary)
             content
+            LithosBalanceSection(store: lithos)
         }
         .padding(10)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -45,15 +50,15 @@ struct BalanceSection: View {
             if store.isEditingKey {
                 // 编辑中不摆刷新 / 更换入口，避免和编辑器里的「保存 / 取消」混在一起。
                 EmptyView()
-            } else if store.hasKey {
+            } else if store.hasKey || lithos.enabled {
                 refreshButton
-                if let lastRefreshed = store.lastRefreshed {
+                if let lastRefreshed = commonRefreshTime {
                     Text(refreshedLabel(lastRefreshed))
                         .font(.system(size: 9.5))
                         .foregroundStyle(.tertiary)
                         .monospacedDigit()
                 }
-                changeKeyButton
+                if store.hasKey { changeKeyButton } else { enterKeyButton }
             } else {
                 enterKeyButton
             }
@@ -61,7 +66,10 @@ struct BalanceSection: View {
     }
 
     private var refreshButton: some View {
-        Button { store.refresh() } label: {
+        Button {
+            store.refresh()
+            if lithos.enabled { lithos.refresh() }
+        } label: {
             HStack(spacing: 3) {
                 if store.isRefreshing {
                     ProgressView()
@@ -77,7 +85,15 @@ struct BalanceSection: View {
         }
         .buttonStyle(.link)
         .font(.system(size: 10.5, weight: .semibold))
-        .disabled(store.isRefreshing)
+        .disabled(store.isRefreshing || (lithos.enabled && lithos.isRefreshing))
+    }
+
+    private var commonRefreshTime: Date? {
+        guard store.hasKey else { return lithos.enabled ? lithos.lastRefreshed : nil }
+        guard let deepSeekTime = store.lastRefreshed else { return nil }
+        guard lithos.enabled else { return deepSeekTime }
+        guard let lithosTime = lithos.lastRefreshed else { return nil }
+        return min(deepSeekTime, lithosTime)
     }
 
     private var enterKeyButton: some View {
@@ -281,19 +297,19 @@ struct BalanceSection: View {
 }
 
 #Preview("余额 · 已加载") {
-    BalanceSection(store: .preview())
+    BalanceSection(store: .preview(), lithos: .preview())
         .padding(15)
         .frame(width: PopoverView.width)
 }
 
 #Preview("余额 · 未填 Key") {
-    BalanceSection(store: .preview(state: .noKey, hasKey: false, lastRefreshed: nil))
+    BalanceSection(store: .preview(state: .noKey, hasKey: false, lastRefreshed: nil), lithos: .preview())
         .padding(15)
         .frame(width: PopoverView.width)
 }
 
 #Preview("余额 · Key 失效") {
-    BalanceSection(store: .preview(state: .failed(.unauthorized)))
+    BalanceSection(store: .preview(state: .failed(.unauthorized)), lithos: .preview())
         .padding(15)
         .frame(width: PopoverView.width)
 }

@@ -22,6 +22,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let store = PricingStore()
     /// 账户余额：启动刷新一次 + 定时刷新（见 `BalanceStore`）。
     private let balance = BalanceStore()
+    private let lithosBalance = LithosBalanceStore()
     /// 自动更新（Sparkle）。
     private let updater = Updater()
     private var statusItem: NSStatusItem?
@@ -44,6 +45,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         store.start()
         // 读钥匙串里的 API Key，有就立刻查一次余额，之后按间隔自动刷新。
         balance.start()
+        lithosBalance.start()
         applyLaunchOverrides()
         configureStatusItem()
         // Sparkle 弹出任何自己的窗口前，先把面板收起来 —— 否则普通层级的更新窗口
@@ -314,6 +316,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         refreshMenuBarNow()
         // 打开面板时顺手看一眼余额是不是已经过期，过期就刷一次。
         balance.refreshIfNeeded()
+        lithosBalance.refreshIfNeeded()
         showPanel(relativeTo: sender)
     }
 
@@ -407,6 +410,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         StatusPanelContent(store: store,
                            onQuit: { NSApp.terminate(nil) },
                            balance: balance,
+                           lithosBalance: lithosBalance,
                            maxHeight: limit,
                            visibility: panelVisibility,
                            automaticallyChecksForUpdates: autoCheckBinding,

@@ -129,6 +129,7 @@ menu bar extras.
 | **Left-click** the whale | Open / close the details panel |
 | **Right-click** the whale | Quick menu: preview peak, preview off-peak, follow live time, show countdown in the menu bar, quit |
 | **Account balance** | Appears in the panel once an API key is saved. **Refresh** queries it immediately; the time of the last successful refresh sits next to the button |
+| **Account balances** | DeepSeek and LithosAI share one balance card and refresh control. LithosAI is off by default; turning it on opens sign-in if needed. Sign out clears this app’s WebView website data, including OAuth sign-in cookies |
 | **Enter / Change API Key** | Opens the key field in the panel. The key is stored in the macOS Keychain; **Remove** deletes it |
 | **Preview** picker in the panel | Force the app to *display* peak or off-peak so you can see both looks at any time. It only changes what is drawn, never the real pricing |
 | **Show countdown in the menu bar** | Adds an `HH:MM:SS` countdown next to the whale (off by default) |
@@ -143,6 +144,7 @@ The panel contains:
 - the countdown to the next switch, plus how far through the current block you are;
 - **the account balance** once an API key is saved — total, plus the granted / topped-up split, a
   Refresh button and the time of the last successful refresh;
+- an optional LithosAI prepaid balance, with its own switch and sign-in button;
 - a monthly pricing calendar for planning ahead, switchable to a 7×24 weekly heat map;
 - the toggles above, a preview picker, and the update controls.
 
@@ -152,12 +154,17 @@ The panel closes when you click anywhere outside it, press <kbd>Esc</kbd>, or cl
 
 ## Privacy
 
-The pricing panel needs no account or API key. The app talks to the network in three narrowly scoped places:
+The pricing panel needs no account or API key. The app talks to the network in four narrowly scoped places:
 
 - **Balance** (opt-in) — if you save a DeepSeek API key, the app calls
   `GET https://api.deepseek.com/user/balance` on launch, every 5 minutes, and when the panel opens or
   the Mac wakes with stale data. Your key is sent only in the `Authorization` header of that one
   request. **With no key saved, no request is ever made.**
+- **LithosAI balance** (off by default) — when enabled, sign-in happens in the app's WKWebView.
+  Once the console session exists, the sign-in window closes. The app reads its own WebKit session
+  cookies in memory and sends them only to `console.lithosai.cloud` for read-only `GET /api/me`
+  and `GET /api/billing`. It refreshes every 5 minutes while enabled. Cookie values are never
+  logged or saved separately, and requests never follow redirects to another domain.
 - **Updates** — Sparkle reads the appcast from this repository's latest GitHub release (daily by
   default, switchable off in the panel).
 - **Holiday calendar** — at most once per day, the app anonymously checks Apple’s public China
@@ -239,7 +246,7 @@ the machine is back.
 - The panel is a self-positioned `NSPanel` (not `NSPopover`), so it can never be pushed off-screen.
 - The schedule is computed from a fixed `Asia/Shanghai` calendar with half-open intervals and the
   cached Chinese public-holiday schedule; the app refreshes on clock changes, day changes and wake.
-- The balance is one `GET /user/balance` call carrying the key from the Keychain. Responses carry a
+- The DeepSeek balance is one `GET /user/balance` call carrying the key from the Keychain. Responses carry a
   token, so a reply that arrives after you have already saved a different key is discarded instead of
   overwriting the new key's state.
 

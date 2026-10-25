@@ -10,6 +10,7 @@ struct PopoverView: View {
     var onQuit: () -> Void
     /// 账户余额（含 API Key 的输入 / 更换）。由 AppDelegate 创建并统一驱动刷新。
     @ObservedObject var balance: BalanceStore
+    @ObservedObject var lithosBalance: LithosBalanceStore
     /// 面板是否显示在屏幕上；收起时水族箱会卸掉动画（详见 `AquariumView`）。
     var isVisible: Bool = true
     /// 固定水族箱的绘制时刻（离屏快照用；`nil` 表示播放动画）。
@@ -155,7 +156,7 @@ struct PopoverView: View {
     // MARK: - 账户余额
 
     private var balanceSection: some View {
-        BalanceSection(store: balance)
+        BalanceSection(store: balance, lithos: lithosBalance)
     }
 
     // MARK: - 规则
@@ -293,7 +294,7 @@ struct PopoverView: View {
     /// 「DeepSeek Status <版本号>」。版本号直接读 bundle（`MARKETING_VERSION`），
     /// 避免升级版本后页脚忘记同步。名字不翻译。
     private static let versionText: String = {
-        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.1"
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.4"
         return "DeepSeek Status \(version)"
     }()
 
@@ -311,11 +312,11 @@ struct PopoverView: View {
 }
 
 #Preview("弹窗 · 高峰") {
-    PopoverView(store: PricingStore(now: Date(), holidaySchedule: .bundled), onQuit: {}, balance: .preview())
+    PopoverView(store: PricingStore(now: Date(), holidaySchedule: .bundled), onQuit: {}, balance: .preview(), lithosBalance: .preview())
 }
 
 #Preview("弹窗 · 空闲") {
     let store = PricingStore(now: Date(), holidaySchedule: .bundled)
     store.previewPeriod = .offPeak
-    return PopoverView(store: store, onQuit: {}, balance: .preview())
+    return PopoverView(store: store, onQuit: {}, balance: .preview(), lithosBalance: .preview())
 }

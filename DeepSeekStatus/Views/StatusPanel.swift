@@ -63,6 +63,7 @@ struct StatusPanelContent: View {
     @ObservedObject var store: PricingStore
     var onQuit: () -> Void
     @ObservedObject var balance: BalanceStore
+    @ObservedObject var lithosBalance: LithosBalanceStore
     var maxHeight: CGFloat?
     /// 面板当前是否真的显示在屏幕上。
     ///
@@ -80,6 +81,7 @@ struct StatusPanelContent: View {
         PopoverView(store: store,
                     onQuit: onQuit,
                     balance: balance,
+                    lithosBalance: lithosBalance,
                     isVisible: visibility.isVisible,
                     fixedAquariumTime: fixedAquariumTime,
                     automaticallyChecksForUpdates: automaticallyChecksForUpdates,
