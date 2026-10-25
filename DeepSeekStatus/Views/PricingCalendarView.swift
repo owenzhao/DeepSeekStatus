@@ -25,10 +25,13 @@ struct PricingScheduleView: View {
     @State private var selectedDate: Date
     @State private var displayedMonth: Date
 
-    init(now: Date, schedule: HolidaySchedule) {
+    /// `initialMode` 只给截图/自检用（`DEEPSEEK_STATUS_SCHEDULE_MODE=week`），
+    /// 用户在面板里切换之后仍然由 `@State` 自己说了算。
+    init(now: Date, schedule: HolidaySchedule, initialMode: Mode = .calendar) {
         self.now = now
         self.schedule = schedule
         let month = DeepSeekPricing.calendar.dateInterval(of: .month, for: now)?.start ?? now
+        _mode = State(initialValue: initialMode)
         _selectedDate = State(initialValue: now)
         _displayedMonth = State(initialValue: month)
     }

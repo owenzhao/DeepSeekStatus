@@ -1606,18 +1606,18 @@
       }
     },
     "popover.preview.banner" : {
-      "comment" : "Banner shown while previewing a period. %@ is the period name.",
+      "comment" : "Banner shown while previewing a period. %@ is the period name. Keep it short: the banner shares a 320pt row with the Resume live button.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Previewing: showing “%@”"
+            "value" : "Previewing “%@”"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "预览中：正在显示「%@」的样子"
+            "value" : "预览中：「%@」"
           }
         }
       }

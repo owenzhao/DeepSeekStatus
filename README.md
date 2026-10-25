@@ -22,7 +22,8 @@ worth answering without opening a browser tab. DeepSeek Status answers it with a
 
 Click the whale to open a panel with the current period, the price multiplier, a live countdown to
 the next switch, a monthly pricing calendar, a weekly schedule heat map, and — once you paste an API key — the balance left on
-your DeepSeek account. Optionally it can also show the countdown directly next to the menu bar icon.
+your DeepSeek account — and an optional second row with your prepaid LithosAI credits. If you want,
+the countdown can also sit directly next to the menu bar icon.
 
 ---
 
@@ -33,7 +34,14 @@ your DeepSeek account. Optionally it can also show the countdown directly next t
 | <img src="Preview/live-panel-peak.png" width="330" alt="Panel during peak hours"> | <img src="Preview/live-panel-offPeak.png" width="330" alt="Panel during off-peak hours"> |
 | *Current English build in peak preview mode.* | *Current English build in off-peak preview mode.* |
 
-The new schedule views:
+One balance card holds both accounts — DeepSeek from the API key, LithosAI from its own sign-in — with a single **Refresh**:
+
+| Both accounts | Nothing yet, no requests |
+| :---: | :---: |
+| <img src="Preview/balance-both.png" width="330" alt="Balance card showing the DeepSeek and LithosAI balances"> | <img src="Preview/balance-no-key.png" width="330" alt="Balance card before an API key is entered"> |
+| *DeepSeek and LithosAI share one card and one refresh time.* | *No key saved means the app never asks for a balance.* |
+
+The schedule views:
 
 | Monthly calendar | Weekly hours |
 | :---: | :---: |
@@ -249,6 +257,9 @@ the machine is back.
 - The DeepSeek balance is one `GET /user/balance` call carrying the key from the Keychain. Responses carry a
   token, so a reply that arrives after you have already saved a different key is discarded instead of
   overwriting the new key's state.
+- The LithosAI balance never touches the keychain: sign-in runs in the app's own `WKWebView`, and the
+  resulting session cookies stay in that WebKit store, so the card can be turned off — or signed out —
+  without affecting anything else on the Mac.
 
 Architecture, tooling, measurements and the pitfalls found along the way are documented in
 **[Docs/DEVELOPMENT.md](Docs/DEVELOPMENT.md)**.

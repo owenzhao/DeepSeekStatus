@@ -296,6 +296,7 @@ Renders the real SwiftUI views with `ImageRenderer`; no window, no screen record
 ```bash
 ./Tools/render-preview.sh              # → Preview/*.png
 ./Tools/render-preview.sh icons        # → App icon source images
+./Tools/render-preview.sh balance      # → Preview/balance-*.png (real AppKit buttons, light + dark)
 ./Tools/render-preview.sh measure      # print the natural size of each view
 ./Tools/render-preview.sh schedule     # pricing schedule self-check
 ./Tools/render-preview.sh candidates   # menu bar color candidate sheet
@@ -307,6 +308,11 @@ point) together with `Tools/Snapshot/main.swift` via `swiftc`, into `Build/snaps
 The `preview` mode writes, among others: menu bar strips on light / dark / translucent-gray
 backdrops in both periods, the two full panels, the aquarium, the weekly grid, the whale vector,
 and animation breakdown sheets (`swim-phases.png`, `sleep-phases.png`).
+
+Those `popover-*.png` renders go through `ImageRenderer`, which cannot draw AppKit-hosted controls —
+buttons, toggles and pickers come out as yellow "unsupported" blocks. The `balance` mode therefore
+renders through `NSHostingView` (`renderHosted`), and the images the README actually shows are the
+`live-*.png` captures from 5.2.
 
 ### 5.2 Runtime diagnostics
 
@@ -329,7 +335,26 @@ Environment variables:
 | --- | --- |
 | `DEEPSEEK_STATUS_DIAGNOSTICS=1` | Run the self-check above and exit |
 | `DEEPSEEK_STATUS_CAPTURE=<dir>` | Where the diagnostics write their PNGs |
+| `DEEPSEEK_STATUS_CAPTURE_DELAY=<seconds>` | Delay the panel capture so the balance requests have settled |
 | `DEEPSEEK_STATUS_PREVIEW=peak\|offPeak` | Force a period at launch (used for screenshots) |
+| `DEEPSEEK_STATUS_SCHEDULE_MODE=week\|calendar` | Pick the schedule view the panel opens on (used for screenshots) |
+| `DEEPSEEK_STATUS_CHECK_UPDATES=1` | Run one update check and report what Sparkle finds |
+
+Refreshing the README images:
+
+```bash
+./Tools/build.sh                                                     # Debug app for the live captures
+./Tools/render-preview.sh && ./Tools/render-preview.sh balance       # Preview/*.png + balance-*.png
+for period in peak offPeak; do
+  DEEPSEEK_STATUS_DIAGNOSTICS=1 DEEPSEEK_STATUS_CAPTURE="$PWD/Preview" \
+  DEEPSEEK_STATUS_CAPTURE_DELAY=2.4 DEEPSEEK_STATUS_PREVIEW=$period \
+    ./Build/DerivedData/Build/Products/Debug/DeepSeekStatus.app/Contents/MacOS/DeepSeekStatus
+done
+```
+
+The panel is captured with whatever the app currently has — a saved API key shows its real balance.
+For the weekly view, run once more with `DEEPSEEK_STATUS_SCHEDULE_MODE=week` and keep that PNG as
+`live-panel-week.png`; `live-panel-calendar.png` is a copy of the default calendar capture.
 
 ### 5.3 Regenerating the app icon
 
@@ -349,6 +374,11 @@ cp Preview/AppIcon/*.png DeepSeekStatus/Assets.xcassets/AppIcon.appiconset/
 
 The script shells out to Sparkle's tools, which SwiftPM unpacks into
 `Build/DerivedData/SourcePackages/artifacts/sparkle/Sparkle/bin/` on the first build.
+
+There is **no CI and no GitHub Actions**: the release is built, signed, notarized and uploaded from
+the maintainer's Mac by that script, so the published binary is exactly the local build. The
+`appcast.xml` must be uploaded as a release asset every time — the in-app `SUFeedURL` points at
+`releases/latest/download/appcast.xml`, so a release without it silently stops updates.
 
 ## 6. Verification
 

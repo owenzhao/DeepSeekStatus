@@ -23,6 +23,14 @@ struct PopoverView: View {
     private var period: PricePeriod { store.period }
     private var snapshot: PricingSnapshot { store.snapshot }
 
+    /// 截图/自检用：`DEEPSEEK_STATUS_SCHEDULE_MODE=week|calendar` 决定面板打开时先选哪个规则视图。
+    private static let initialScheduleMode: PricingScheduleView.Mode = {
+        switch ProcessInfo.processInfo.environment["DEEPSEEK_STATUS_SCHEDULE_MODE"]?.lowercased() {
+        case "week": .week
+        default: .calendar
+        }
+    }()
+
     var body: some View {
         VStack(spacing: 0) {
             AquariumView(period: period, now: snapshot.now, isVisible: isVisible,
@@ -176,7 +184,8 @@ struct PopoverView: View {
                     detail: String(localized: "popover.schedule.offPeak.detail",
                                    defaultValue: "All other times, weekends, and Chinese public holidays"))
 
-            PricingScheduleView(now: snapshot.now, schedule: store.holidaySchedule)
+            PricingScheduleView(now: snapshot.now, schedule: store.holidaySchedule,
+                                initialMode: Self.initialScheduleMode)
 
             Text(footnote)
                 .font(.system(size: 9.5))

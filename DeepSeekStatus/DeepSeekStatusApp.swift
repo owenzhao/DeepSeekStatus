@@ -183,9 +183,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             } else {
                 print("[诊断] ❌ 面板未创建")
             }
-            if let contentView = panel?.contentView {
-                let data = capture(contentView, named: "live-panel-\(store.period.rawValue)")
-                print("[诊断] 面板截图 字节数=\(data?.count ?? 0) 内容尺寸=\(contentView.bounds.size)")
+            // 刚打开面板时余额请求还没回来，直接截会拍到「Checking balance…」。
+            // `DEEPSEEK_STATUS_CAPTURE_DELAY=<秒>` 把截图推后一点，等数据落定再拍。
+            let captureDelay = ProcessInfo.processInfo.environment["DEEPSEEK_STATUS_CAPTURE_DELAY"]
+                .flatMap(Double.init) ?? 0
+            DispatchQueue.main.asyncAfter(deadline: .now() + captureDelay) { [self] in
+                if let contentView = panel?.contentView {
+                    let data = capture(contentView, named: "live-panel-\(store.period.rawValue)")
+                    print("[诊断] 面板截图 字节数=\(data?.count ?? 0) 内容尺寸=\(contentView.bounds.size)")
+                }
             }
         }
 
@@ -207,8 +213,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         // 触发更新检查时要留出网络往返时间，别把还在检查的进程提前杀掉。
+        // 截图被 `DEEPSEEK_STATUS_CAPTURE_DELAY` 推后时，进程存活时间也要跟着放宽。
+        let captureDelay = ProcessInfo.processInfo.environment["DEEPSEEK_STATUS_CAPTURE_DELAY"]
+            .flatMap(Double.init) ?? 0
         let lifetime: TimeInterval = ProcessInfo.processInfo.environment["DEEPSEEK_STATUS_CHECK_UPDATES"] == "1"
-            ? 25 : 3.6
+            ? 25 : max(3.6, 1.3 + captureDelay)
         DispatchQueue.main.asyncAfter(deadline: .now() + lifetime) {
             NSApp.terminate(nil)
         }
