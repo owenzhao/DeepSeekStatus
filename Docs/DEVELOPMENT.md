@@ -380,6 +380,12 @@ the maintainer's Mac by that script, so the published binary is exactly the loca
 `appcast.xml` must be uploaded as a release asset every time — the in-app `SUFeedURL` points at
 `releases/latest/download/appcast.xml`, so a release without it silently stops updates.
 
+With `--upload` the script tags `HEAD` as `v<version>` and pushes the tag *before* calling
+`gh release create`, so the local repository and GitHub always end up with the same tag object.
+Letting `gh` create the tag instead leaves the local clone without it — which is exactly what
+happened with `v1.4`. A dirty worktree does not block the upload, but the script says so, because
+the tag then points at `HEAD` rather than at the tree that was just packed.
+
 ## 6. Verification
 
 `./Tools/render-preview.sh schedule` covers 13 boundary cases — 09:00, 12:00, 14:00 and 18:00 from

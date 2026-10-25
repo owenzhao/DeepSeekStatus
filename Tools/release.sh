@@ -114,6 +114,21 @@ echo "   更新源: $ARCHIVES/appcast.xml"
 
 # 5. 可选：发布到 GitHub
 if [[ "$UPLOAD" == "1" ]]; then
+  # 标签要在 gh release 之前就建好并推上去。
+  # gh release create 会在远端自动建 tag，本地永远收不到那一个（v1.4 就这样漏过），
+  # 先本地打、先推送，Release 就直接绑在这个 tag 上，两边不会再各有一份。
+  if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+    echo "🏷  本地已有 tag $TAG → $(git rev-parse --short "refs/tags/$TAG")"
+  else
+    if [[ -n "$(git status --porcelain)" ]]; then
+      echo "⚠️ 工作树有未提交的改动：tag $TAG 指向 HEAD $(git rev-parse --short HEAD)，"
+      echo "   和刚打出来的二进制未必是同一份内容。"
+    fi
+    git tag "$TAG"
+    echo "🏷  已打 tag $TAG → $(git rev-parse --short HEAD)"
+  fi
+  git push origin "$TAG"
+
   if ! gh release view "$TAG" >/dev/null 2>&1; then
     gh release create "$TAG" --title "DeepSeek Status $VERSION" --generate-notes
   fi
@@ -122,6 +137,7 @@ if [[ "$UPLOAD" == "1" ]]; then
 else
   echo
   echo "下一步（手动发布）："
+  echo "  git tag $TAG && git push origin $TAG   # 先推 tag，别让 gh 在远端替你建"
   echo "  gh release create $TAG --title 'DeepSeek Status $VERSION' --generate-notes"
   echo "  gh release upload $TAG '$ARCHIVES/$ZIP_NAME' '$ARCHIVES/appcast.xml'"
 fi
