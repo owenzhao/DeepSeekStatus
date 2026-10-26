@@ -98,8 +98,9 @@ half of the content. Owning the window fixes that:
   <kbd>Esc</kbd>, and the status item button itself. This reproduces `NSPopover`'s `.transient`
   behaviour without handing over control of the geometry.
 
-Panel width is `PopoverView.width` (320 pt). With the monthly calendar selected its natural height is
-about 914 pt; the existing `StatusPanelContent` scroll fallback keeps it usable on shorter screens.
+Panel width is `PopoverView.width` (320 pt). Since the account area became one card per provider,
+the monthly calendar selection measures 1112 pt and the weekly grid 957 pt; the existing
+`StatusPanelContent` scroll fallback keeps the panel usable on shorter screens.
 
 ### 2.3 Pricing model
 
@@ -299,6 +300,7 @@ Renders the real SwiftUI views with `ImageRenderer`; no window, no screen record
 ./Tools/render-preview.sh balance      # → Preview/balance-*.png (real AppKit buttons, light + dark)
 ./Tools/render-preview.sh measure      # print the natural size of each view
 ./Tools/render-preview.sh schedule     # pricing schedule self-check
+./Tools/render-preview.sh rates        # provider price sheet self-check (fixed tiers stay fixed)
 ./Tools/render-preview.sh candidates   # menu bar color candidate sheet
 ```
 
@@ -399,13 +401,24 @@ both sides, the Friday-evening-to-Monday-morning span, and time-zone independenc
 全部通过 ✅
 ```
 
+`./Tools/render-preview.sh rates` guards the price sheet: every LithosAI tier must read the same in
+both periods (Base `×0.50`, Fast `×0.83`, Ultra `×1.17`), never get a "now" mark, and DeepSeek must
+mark exactly one row matching the current multiplier. It was added after the period multiplier was
+divided into the fixed tiers once, which doubled every LithosAI price off-peak:
+
+```
+✅ LithosAI Base @ Off-peak hours = ×0.50（应为 ×0.50）
+...
+价目全部通过 ✅
+```
+
 A panel placement check on a 2560×1410 display, with the status item at `(1359, 1414, 46, 22)`:
 
 ```
-面板窗口=(1283.0, 490.0, 320.0, 914.0)   ← centred under the icon and clamped into visibleFrame
+面板窗口=(1353.0, 292.0, 320.0, 1112.0)   ← centred under the icon and clamped into visibleFrame
 屏幕可见区域=(0.0, 0.0, 2560.0, 1410.0)
 面板是否完全在可见区域内=true
-最近 2 秒 SwiftUI 画布重绘 60 帧 ≈ 30.0 fps（只剩下已打开的面板水族箱）
+最近 2 秒 SwiftUI 画布重绘 41 帧 ≈ 20.5 fps（只剩下已打开的面板水族箱）
 ```
 
 With the panel closed, idle CPU is 0.0% and the menu bar icon does not repaint (two captures taken

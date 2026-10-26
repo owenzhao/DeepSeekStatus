@@ -20,10 +20,11 @@ worth answering without opening a browser tab. DeepSeek Status answers it with a
 - 🔵 **Peak hours** — a bright DeepSeek-blue whale, head up, bubbles trailing behind its tail.
 - 😴 **Off-peak hours** — a pale, sleepy whale lying on its side, with little `z`s floating above it.
 
-Click the whale to open a panel with the current period, the price multiplier, a live countdown to
-the next switch, a monthly pricing calendar, a weekly schedule heat map, and — once you paste an API key — the balance left on
-your DeepSeek account — and an optional second row with your prepaid LithosAI credits. If you want,
-the countdown can also sit directly next to the menu bar icon.
+Click the whale to open a panel with one card per provider. The **DeepSeek** card holds the current
+period, the price multiplier, a rate bar, a live countdown to the next switch and — once you paste an
+API key — the balance left on your account. An optional **LithosAI** card adds your prepaid credits,
+the three tier prices and its own sign-in. Below the cards sit a monthly pricing calendar and a weekly
+schedule heat map. If you want, the countdown can also sit directly next to the menu bar icon.
 
 ---
 
@@ -34,12 +35,20 @@ the countdown can also sit directly next to the menu bar icon.
 | <img src="Preview/live-panel-peak.png" width="330" alt="Panel during peak hours"> | <img src="Preview/live-panel-offPeak.png" width="330" alt="Panel during off-peak hours"> |
 | *Current English build in peak preview mode.* | *Current English build in off-peak preview mode.* |
 
-One balance card holds both accounts — DeepSeek from the API key, LithosAI from its own sign-in — with a single **Refresh**:
+Each provider gets its own card — DeepSeek from the API key, LithosAI from its own sign-in — under one
+shared **Refresh**:
 
-| Both accounts | Nothing yet, no requests |
+| Both providers | Nothing yet, no requests |
 | :---: | :---: |
-| <img src="Preview/balance-both.png" width="330" alt="Balance card showing the DeepSeek and LithosAI balances"> | <img src="Preview/balance-no-key.png" width="330" alt="Balance card before an API key is entered"> |
-| *DeepSeek and LithosAI share one card and one refresh time.* | *No key saved means the app never asks for a balance.* |
+| <img src="Preview/balance-both.png" width="330" alt="DeepSeek card with its period and balance above a LithosAI card with its balance and tier prices"> | <img src="Preview/balance-no-key.png" width="330" alt="Cards before an API key is entered"> |
+| *The DeepSeek card holds the period and balance; the LithosAI card holds its credits and tiers, where `×1` is DeepSeek's peak price.* | *No key saved means the app never asks for a balance.* |
+
+The key editor and a failed refresh, straight in the DeepSeek card:
+
+| Key editor | Refresh failed |
+| :---: | :---: |
+| <img src="Preview/balance-key-editor.png" width="330" alt="DeepSeek card with the API key field open"> | <img src="Preview/balance-failed.png" width="330" alt="DeepSeek card reporting a failed balance request"> |
+| *Enter, change or remove the key in place; it lives in the macOS Keychain.* | *An expired key offers **Change API Key** right where it failed.* |
 
 The schedule views:
 
@@ -136,8 +145,8 @@ menu bar extras.
 | --- | --- |
 | **Left-click** the whale | Open / close the details panel |
 | **Right-click** the whale | Quick menu: preview peak, preview off-peak, follow live time, show countdown in the menu bar, quit |
-| **Account balance** | Appears in the panel once an API key is saved. **Refresh** queries it immediately; the time of the last successful refresh sits next to the button |
-| **Account balances** | DeepSeek and LithosAI share one balance card and refresh control. LithosAI is off by default; turning it on opens sign-in if needed. Sign out clears this app’s WebView website data, including OAuth sign-in cookies |
+| **Account balance** | The DeepSeek card appears in the panel once an API key is saved. **Refresh** queries every enabled provider immediately; the time of the last successful refresh sits next to the button |
+| **LithosAI card** | Off by default. Once it has a session, the card shows the prepaid balance, **Sign out** and its three tier prices. Turning the switch off only hides the card — the WebKit session is kept, so turning it back on does not ask you to sign in again. **Sign out** clears this app’s WebView website data, including OAuth sign-in cookies |
 | **Enter / Change API Key** | Opens the key field in the panel. The key is stored in the macOS Keychain; **Remove** deletes it |
 | **Preview** picker in the panel | Force the app to *display* peak or off-peak so you can see both looks at any time. It only changes what is drawn, never the real pricing |
 | **Show countdown in the menu bar** | Adds an `HH:MM:SS` countdown next to the whale (off by default) |
@@ -145,14 +154,14 @@ menu bar extras.
 | **Auto-check for updates** | Sparkle checks the appcast in the background (on by default). **Check Now** in the panel, or **Check for Updates…** in the right-click menu, runs a check immediately |
 | **Quit** | Quits the app |
 
-The panel contains:
+The panel contains one card per provider, so everything about a provider sits in its own card:
 
-- the current period and its price multiplier (`×1.0` / `×0.5`);
-- a "current unit price" comparison bar;
-- the countdown to the next switch, plus how far through the current block you are;
-- **the account balance** once an API key is saved — total, plus the granted / topped-up split, a
-  Refresh button and the time of the last successful refresh;
-- an optional LithosAI prepaid balance, with its own switch and sign-in button;
+- **DeepSeek** — the current period and its price multiplier (`×1.0` / `×0.5`), a "current unit
+  price" comparison bar, the countdown to the next switch plus how far through the current block you
+  are, and then the balance once an API key is saved (total, plus the granted / topped-up split);
+- **LithosAI** — an on/off switch, the prepaid balance with **Sign out**, and its three tier prices
+  (Base / Fast / Ultra) as a limited-time offer. Turn the switch off and the whole card disappears;
+- one shared **Refresh** button and the time of the last successful refresh, above the cards;
 - a monthly pricing calendar for planning ahead, switchable to a 7×24 weekly heat map;
 - the toggles above, a preview picker, and the update controls.
 
@@ -205,6 +214,17 @@ the panel's key editor deletes it.
 Yes, and that case is handled explicitly: a failed refresh always offers **Change API Key**, and an
 expired key is reported as *"The API key is invalid or expired. Replace it?"*. A working key can be
 replaced too, from the small key button next to the refresh time.
+
+**What do the LithosAI prices mean?**
+Every multiple in the app uses **DeepSeek's peak price as `×1`**, so the two providers can be compared
+directly. DeepSeek's own row follows the clock (peak `×1`, off-peak `×0.5`); LithosAI does not have
+peak hours, so its three tiers are the same all day: Base `×0.50`, Fast `×0.83`, Ultra `×1.17`. Those
+are its current **limited-time** prices, read from a constant in the app rather than from the network,
+and they may change — the number to trust is always the one in your LithosAI console.
+
+**Does turning the LithosAI switch off sign me out?**
+No. The switch only decides whether the card is shown; the WebKit session and its cookies stay, so
+turning it back on resumes right where you left off. Only **Sign out** clears the website data.
 
 **Which time zone is used?**
 Beijing time (`Asia/Shanghai`, UTC+8, no DST) always, no matter where your Mac is. This is
@@ -260,6 +280,12 @@ the machine is back.
 - The LithosAI balance never touches the keychain: sign-in runs in the app's own `WKWebView`, and the
   resulting session cookies stay in that WebKit store, so the card can be turned off — or signed out —
   without affecting anything else on the Mac.
+- Everything a provider knows lives in that provider's card: DeepSeek's period, rate bar and countdown
+  used to sit in the panel header with its balance half a screen below, and LithosAI's tiers had
+  nowhere to go. One card per provider means neither provider's rules can leak into the other's.
+- The prices themselves are a small table (`Models/ProviderRateSheet.swift`) keyed to DeepSeek's peak
+  price; DeepSeek's rows are `timeOfDay`, LithosAI's are `flat`, and a check in
+  `./Tools/render-preview.sh rates` fails if the current period is ever multiplied into a fixed tier.
 
 Architecture, tooling, measurements and the pitfalls found along the way are documented in
 **[Docs/DEVELOPMENT.md](Docs/DEVELOPMENT.md)**.
