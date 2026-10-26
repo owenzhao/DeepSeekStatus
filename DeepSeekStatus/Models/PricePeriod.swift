@@ -362,6 +362,17 @@ enum PricingFormatter {
         return (1...7).map { symbols[$0 % 7] }
     }()
 
+    /// 价目表里的倍数：`×0.5`、`×1`、`×1.67`、`×2.33`。
+    ///
+    /// 整数不补小数位（`×1` 而不是 `×1.00`），其余固定两位；各家档位按同一把尺比较，
+    /// 位数统一才不会让 0.5 和 1.6667 挤在一起。
+    static func multiplier(_ value: Double) -> String {
+        let text = value == value.rounded()
+            ? String(format: "%.0f", value)
+            : String(format: "%.2f", value)
+        return "×\(text)"
+    }
+
     /// 把秒数格式化成「1 hour 23 min」「23 min 05 sec」这类可读文案。
     static func duration(_ seconds: TimeInterval) -> String {
         let total = Int(seconds.rounded(.down))

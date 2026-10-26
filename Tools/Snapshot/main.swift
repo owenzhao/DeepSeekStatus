@@ -486,6 +486,45 @@ func checkSchedule() {
     print(failures == 0 ? "\n全部通过 ✅" : "\n失败 \(failures) 项 ❌")
 }
 
+// MARK: - 价目自检
+
+/// LithosAI 的报价不分峰谷，任何时候都必须是同一组数字；DeepSeek 则只有一个时段在收钱。
+/// 这段检查专门盯住「有人又把当前时段乘/除进去」这类回归。
+@MainActor
+func checkRates() {
+    var failures = 0
+    let lithos = ProviderRateSheet.lithos
+    let expected: [String: Double] = ["Base": 0.5, "Fast": 0.5 * 10 / 6, "Ultra": 0.5 * 14 / 6]
+
+    for period in PricePeriod.allCases {
+        for rate in lithos.rates {
+            let shown = lithos.displayedMultiplier(of: rate)
+            let want = expected[rate.name] ?? -1
+            let ok = abs(shown - want) < 1e-9
+            if !ok { failures += 1 }
+            print("\(ok ? "✅" : "❌") LithosAI \(rate.name) @ \(period.title) = ×\(String(format: "%.2f", shown))（应为 ×\(String(format: "%.2f", want))）")
+        }
+    }
+    let flatOK = !lithos.variesWithTimeOfDay
+    let noNow = PricePeriod.allCases.allSatisfy { period in
+        lithos.rates.allSatisfy { !lithos.isCharging($0, in: period) }
+    }
+    print("\(flatOK ? "✅" : "❌") LithosAI 不分峰谷")
+    print("\(noNow ? "✅" : "❌") LithosAI 从不标记「now」")
+    if !flatOK || !noNow { failures += 1 }
+
+    for period in PricePeriod.allCases {
+        let marked = ProviderRateSheet.deepSeek.rates.filter {
+            ProviderRateSheet.deepSeek.isCharging($0, in: period)
+        }
+        let ok = marked.count == 1 && abs(marked[0].multiplier - period.priceMultiplier) < 1e-9
+        if !ok { failures += 1 }
+        print("\(ok ? "✅" : "❌") DeepSeek \(period.title) 只有一行「now」= ×\(String(format: "%.1f", period.priceMultiplier))")
+    }
+
+    print(failures == 0 ? "价目全部通过 ✅" : "价目失败 \(failures) 项 ❌")
+}
+
 // MARK: - 账户余额卡片（走 AppKit，能看到真实按钮）
 
 @MainActor
@@ -503,14 +542,16 @@ func renderBalanceCards() {
         }(), .preview()),
     ]
     for (name, balance, lithos) in cases {
-        renderHosted(BalanceSection(store: balance, lithos: lithos)
+        renderHosted(AccountSection(store: balance, lithos: lithos,
+                                   snapshot: PricingSnapshot(now: Date()), period: .peak)
                         .padding(15)
                         .background(Color(nsColor: .windowBackgroundColor)),
                      width: 320, name: name)
     }
 
     // 深色模式下再看一遍：卡片底色、分隔线都是按 primary 的透明度叠出来的，要确认还看得清。
-    renderHosted(BalanceSection(store: .preview(), lithos: .preview(enabled: true, state: .loaded("$24.94")))
+    renderHosted(AccountSection(store: .preview(), lithos: .preview(enabled: true, state: .loaded("$24.94")),
+                              snapshot: PricingSnapshot(now: Date()), period: .peak)
                     .padding(15)
                     .background(Color(nsColor: .windowBackgroundColor)),
                  width: 320, scheme: .dark, name: "balance-both-dark")
@@ -526,6 +567,8 @@ MainActor.assumeIsolated {
         measure()
     case "schedule":
         checkSchedule()
+    case "rates":
+        checkRates()
     case "candidates":
         renderColorCandidates()
     case "balance":

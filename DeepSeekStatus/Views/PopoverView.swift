@@ -39,10 +39,7 @@ struct PopoverView: View {
                 previewBanner
             }
             VStack(alignment: .leading, spacing: 10) {
-                headerSection
-                priceSection
-                countdownSection
-                balanceSection
+                accountSection
                 Divider()
                 scheduleSection
                 Divider()
@@ -75,96 +72,12 @@ struct PopoverView: View {
         .background(WhaleTheme.accent(for: period).opacity(0.16))
     }
 
-    // MARK: - 状态
+    // MARK: - 账户（按服务商分卡，余额和价格都在各自卡里）
 
-    private var headerSection: some View {
-        VStack(alignment: .leading, spacing: 3) {
-            HStack(alignment: .firstTextBaseline) {
-                Text(period.title)
-                    .font(.system(size: 19, weight: .bold))
-                Spacer()
-                Text(verbatim: "×\(String(format: "%.1f", period.priceMultiplier))")
-                    .font(.system(size: 15, weight: .bold, design: .rounded))
-                    .foregroundStyle(WhaleTheme.accent(for: period))
-            }
-            Text(headerDetail)
-                .font(.system(size: 11.5))
-                .foregroundStyle(WhaleTheme.labelTint)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-    }
-
-    private var headerDetail: String {
-        switch snapshot.dayInfo.kind {
-        case .publicHoliday, .alternateWorkdayWeekend:
-            snapshot.dayInfo.localizedDetail
-        case .weekend, .regularWeekday:
-            period.summary
-        }
-    }
-
-    private var priceSection: some View {
-        VStack(alignment: .leading, spacing: 5) {
-            HStack {
-                Text(String(localized: "popover.currentRate", defaultValue: "Current rate"))
-                    .font(.system(size: 11.5, weight: .medium))
-                Spacer()
-                Text(period.priceText)
-                    .font(.system(size: 11.5, weight: .semibold))
-                    .foregroundStyle(WhaleTheme.accent(for: period))
-            }
-            GeometryReader { geometry in
-                ZStack(alignment: .leading) {
-                    Capsule().fill(Color.secondary.opacity(0.16))
-                    Capsule()
-                        .fill(LinearGradient(colors: [WhaleTheme.accent(for: period).opacity(0.75),
-                                                      WhaleTheme.accent(for: period)],
-                                             startPoint: .leading, endPoint: .trailing))
-                        .frame(width: max(6, geometry.size.width * period.priceMultiplier))
-                }
-            }
-            .frame(height: 6)
-        }
-    }
-
-    private var countdownSection: some View {
-        VStack(alignment: .leading, spacing: 5) {
-            HStack(spacing: 6) {
-                Image(systemName: "clock")
-                    .font(.system(size: 11))
-                    .foregroundStyle(WhaleTheme.labelTint)
-                Text(String(format: String(localized: "popover.countdown.title",
-                                          defaultValue: "Time until “%@”"),
-                            snapshot.nextPeriod.title))
-                    .font(.system(size: 11.5, weight: .medium))
-                Spacer()
-                Text(PricingFormatter.duration(snapshot.secondsUntilTransition))
-                    .font(.system(size: 12.5, weight: .bold, design: .rounded))
-                    .monospacedDigit()
-            }
-            Text(String(format: String(localized: "popover.countdown.detail",
-                                      defaultValue: "Switches to %2$@ %1$@"),
-                        PricingFormatter.transitionDescription(snapshot.nextTransition, relativeTo: snapshot.now),
-                        snapshot.nextPeriod.title))
-                .font(.system(size: 10.5))
-                .foregroundStyle(WhaleTheme.labelTint)
-            // 当前时段的进度：自定义细条比 ProgressView 更紧凑。
-            GeometryReader { geometry in
-                ZStack(alignment: .leading) {
-                    Capsule().fill(Color.secondary.opacity(0.14))
-                    Capsule()
-                        .fill(WhaleTheme.accent(for: period).opacity(0.85))
-                        .frame(width: max(3, geometry.size.width * snapshot.intervalProgress))
-                }
-            }
-            .frame(height: 3)
-        }
-    }
-
-    // MARK: - 账户余额
-
-    private var balanceSection: some View {
-        BalanceSection(store: balance, lithos: lithosBalance)
+    /// DeepSeek 卡里放着时段、倍数、费率条和倒计时——这些全是 DeepSeek 自己的计费状态；
+    /// LithosAI 卡里是它的余额和三档报价。动画（水族箱）留在最上面，两家共用。
+    private var accountSection: some View {
+        AccountSection(store: balance, lithos: lithosBalance, snapshot: snapshot, period: period)
     }
 
     // MARK: - 规则
@@ -303,7 +216,7 @@ struct PopoverView: View {
     /// 「DeepSeek Status <版本号>」。版本号直接读 bundle（`MARKETING_VERSION`），
     /// 避免升级版本后页脚忘记同步。名字不翻译。
     private static let versionText: String = {
-        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.4"
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.5"
         return "DeepSeek Status \(version)"
     }()
 

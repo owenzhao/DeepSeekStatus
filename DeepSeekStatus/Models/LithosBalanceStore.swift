@@ -61,13 +61,33 @@ final class LithosBalanceStore: NSObject, ObservableObject, WKNavigationDelegate
         enabled = value
         UserDefaults.standard.set(value, forKey: Self.enabledKey)
         if value {
-            shouldAutomaticallySignIn = true
+            // 重新打开只是恢复显示。会话还留在 WebKit 里（关掉开关不清 Cookie），
+            // 所以先按「已经登录」去读一次；万一真的过期了，`refresh()` 会把它标成
+            // `signedOut`，那时候也不自动弹登录窗——要让用户看到了失败原因再自己点登录，
+            // 而不是关一下开关回来就得重新登一次。
+            shouldAutomaticallySignIn = false
+            Task { await probeStoredSession() }
             refresh()
         } else {
             requestID += 1
             isRefreshing = false
-            state = .signedOut
+            // 关掉开关不清网站数据、也不清 `hasSession`：登录状态是用户自己的，关掉只是
+            // 不再显示这一块，再次打开就能接着用，不必重新登录。
+            if case .loaded = state {} else { state = .signedOut }
             loginWindow?.close()
+        }
+    }
+
+    /// 只在内存里判断 WebKit 是否还留着 LithosAI 控制台的会话 Cookie，不联网。
+    /// 关掉开关、再打开时用它接上原来的登录状态，避免短暂闪一下「Sign in」。
+    private func probeStoredSession() async {
+        let cookies = await withCheckedContinuation { continuation in
+            WKWebsiteDataStore.default().httpCookieStore.getAllCookies { continuation.resume(returning: $0) }
+        }
+        guard enabled else { return }
+        hasSession = cookies.contains {
+            $0.domain == Self.console.host && $0.name == "__Host-console_session"
+                && ($0.expiresDate.map { $0 > Date() } ?? true)
         }
     }
 
@@ -98,7 +118,13 @@ final class LithosBalanceStore: NSObject, ObservableObject, WKNavigationDelegate
             case .failure(let error as LithosError) where error == .signedOut:
                 state = .signedOut
                 hasSession = false
-                if shouldAutomaticallySignIn { signIn() }
+                // 刚打开开关的那一次不自动弹窗：会话真过期了，让用户看到「Sign in」再自己点，
+                // 免得关一下开关回来就被弹一个登录窗。
+                if shouldAutomaticallySignIn {
+                    signIn()
+                } else {
+                    shouldAutomaticallySignIn = true
+                }
             case .failure(let error):
                 state = .failed(error.localizedDescription)
             }

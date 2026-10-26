@@ -1469,40 +1469,6 @@
         }
       }
     },
-    "popover.countdown.title" : {
-      "comment" : "Countdown row title. %@ is the name of the next period.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Time until “%@”"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "距离「%@」还有"
-          }
-        }
-      }
-    },
-    "popover.currentRate" : {
-      "comment" : "Label above the current unit price.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Current rate"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "当前单价"
-          }
-        }
-      }
-    },
     "popover.footnote.beijing" : {
       "comment" : "Footnote explaining that every time is Beijing time.",
       "localizations" : {
@@ -1737,6 +1703,108 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "立即检查"
+          }
+        }
+      }
+    },
+    "rates.limitedTime.badge" : {
+      "comment" : "Badge marking a provider's prices as a limited-time offer.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Limited time"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "限时优惠"
+          }
+        }
+      }
+    },
+    "rates.limitedTime.note" : {
+      "comment" : "Footnote explaining that the LithosAI prices shown are promotional.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LithosAI’s prices are a limited-time offer and may change."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LithosAI 的价格为限时优惠，之后可能调整。"
+          }
+        }
+      }
+    },
+    "rates.comparison.footnote" : {
+      "comment" : "Legend explaining the two multipliers shown for each LithosAI tier.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "×1 = DeepSeek peak price. Limited-time prices, the same all day."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "×1 为 DeepSeek 高峰价。限时优惠价，全天同价。"
+          }
+        }
+      }
+    },
+    "rates.help.reference" : {
+      "comment" : "Tooltip for the dimmed multiplier, which is a fixed reference against DeepSeek’s peak price.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Relative to DeepSeek’s peak price"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "相对 DeepSeek 高峰价"
+          }
+        }
+      }
+    },
+    "rates.now" : {
+      "comment" : "Suffix marking the tariff a provider is charging right now.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "now"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当前"
+          }
+        }
+      }
+    },
+    "rates.rateLabel" : {
+      "comment" : "Small label above a provider's tariff list.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rate"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "价格"
           }
         }
       }
