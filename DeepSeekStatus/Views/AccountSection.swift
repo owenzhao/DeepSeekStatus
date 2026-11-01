@@ -23,6 +23,9 @@ struct AccountSection: View {
     /// 当前时段。
     let period: PricePeriod
 
+    /// 离屏快照用：指定哪个 LithosAI 模型要冒悬停泡泡，界面上永远是 `nil`。
+    var hoveredRate: String?
+
     /// 刷新时间的格式化：跟随界面语言，用本地时区（这是用户自己的操作时刻）。
     private static let timeFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -69,12 +72,14 @@ struct AccountSection: View {
                                 )
                             Spacer(minLength: 0)
                         }
-                        ProviderRateRows(period: period, sheet: .lithos, showsScaleNote: true)
-                        Text(String(localized: "rates.limitedTime.note",
-                                    defaultValue: "LithosAI’s prices are a limited-time offer and may change."))
-                            .font(.system(size: 9))
-                            .foregroundStyle(WhaleTheme.labelTint)
-                            .fixedSize(horizontal: false, vertical: true)
+                        ProviderRateRows(
+                            period: period,
+                            sheet: .lithos,
+                            showsScaleNote: true,
+                            notice: String(localized: "rates.limitedTime.note",
+                                           defaultValue: "LithosAI’s prices are a limited-time offer and may change."),
+                            previewHoveredModel: hoveredRate
+                        )
                     }
                 }
             }

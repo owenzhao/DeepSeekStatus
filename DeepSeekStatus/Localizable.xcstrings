@@ -966,22 +966,6 @@
         }
       }
     },
-    "lithos.balance.signedOut" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sign in to LithosAI."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "请登录 LithosAI。"
-          }
-        }
-      }
-    },
     "lithos.balance.signIn" : {
       "localizations" : {
         "en" : {
@@ -994,22 +978,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "登录"
-          }
-        }
-      }
-    },
-    "lithos.balance.signingOut" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Signing out…"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "正在退出登录…"
           }
         }
       }
@@ -1058,6 +1026,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "退出登录"
+          }
+        }
+      }
+    },
+    "lithos.balance.signedOut" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign in to LithosAI."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请登录 LithosAI。"
+          }
+        }
+      }
+    },
+    "lithos.balance.signingOut" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Signing out…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在退出登录…"
           }
         }
       }
@@ -1707,6 +1707,40 @@
         }
       }
     },
+    "rates.comparison.footnote" : {
+      "comment" : "Legend explaining the two multipliers shown for each LithosAI tier.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "×1 = DeepSeek’s peak output price. The same all day."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "×1 为 DeepSeek 高峰输出价，全天同价。"
+          }
+        }
+      }
+    },
+    "rates.help.reference" : {
+      "comment" : "Tooltip for the dimmed multiplier, which is a fixed reference against DeepSeek’s peak price.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Relative to DeepSeek’s peak price"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "相对 DeepSeek 高峰价"
+          }
+        }
+      }
+    },
     "rates.limitedTime.badge" : {
       "comment" : "Badge marking a provider's prices as a limited-time offer.",
       "localizations" : {
@@ -1741,40 +1775,6 @@
         }
       }
     },
-    "rates.comparison.footnote" : {
-      "comment" : "Legend explaining the two multipliers shown for each LithosAI tier.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "×1 = DeepSeek peak price. Limited-time prices, the same all day."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "×1 为 DeepSeek 高峰价。限时优惠价，全天同价。"
-          }
-        }
-      }
-    },
-    "rates.help.reference" : {
-      "comment" : "Tooltip for the dimmed multiplier, which is a fixed reference against DeepSeek’s peak price.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Relative to DeepSeek’s peak price"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "相对 DeepSeek 高峰价"
-          }
-        }
-      }
-    },
     "rates.now" : {
       "comment" : "Suffix marking the tariff a provider is charging right now.",
       "localizations" : {
@@ -1805,6 +1805,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "价格"
+          }
+        }
+      }
+    },
+    "rates.speed.help" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Output speed the provider advertises per user"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "服务商标称的单用户输出速度"
           }
         }
       }

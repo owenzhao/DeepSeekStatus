@@ -23,8 +23,9 @@ worth answering without opening a browser tab. DeepSeek Status answers it with a
 Click the whale to open a panel with one card per provider. The **DeepSeek** card holds the current
 period, the price multiplier, a rate bar, a live countdown to the next switch and — once you paste an
 API key — the balance left on your account. An optional **LithosAI** card adds your prepaid credits,
-the three tier prices and its own sign-in. Below the cards sit a monthly pricing calendar and a weekly
-schedule heat map. If you want, the countdown can also sit directly next to the menu bar icon.
+the tier prices of every model it sells and its own sign-in. Below the cards sit a monthly pricing
+calendar and a weekly schedule heat map. If you want, the countdown can also sit directly next to the
+menu bar icon.
 
 ---
 
@@ -40,8 +41,17 @@ shared **Refresh**:
 
 | Both providers | Nothing yet, no requests |
 | :---: | :---: |
-| <img src="Preview/balance-both.png" width="330" alt="DeepSeek card with its period and balance above a LithosAI card with its balance and tier prices"> | <img src="Preview/balance-no-key.png" width="330" alt="Cards before an API key is entered"> |
-| *The DeepSeek card holds the period and balance; the LithosAI card holds its credits and tiers, where `×1` is DeepSeek's peak price.* | *No key saved means the app never asks for a balance.* |
+| <img src="Preview/balance-both.png" width="330" alt="DeepSeek card with its period and balance above a LithosAI card with its balance and per-model prices"> | <img src="Preview/balance-no-key.png" width="330" alt="Cards before an API key is entered"> |
+| *The DeepSeek card holds the period and balance; the LithosAI card holds its credits and one line per model — its cheapest tier's price and advertised speed, where `×1` is DeepSeek's peak price.* | *No key saved means the app never asks for a balance.* |
+
+Each model only shows its cheapest tier, plus the single-user output speed the provider advertises.
+Hover a row and the rest of that model's tiers drop down in a bubble under it, always the same
+direction, with the model name still visible above — nothing in the card moves or shifts:
+
+| Hovering a model | Same card in dark mode |
+| :---: | :---: |
+| <img src="Preview/balance-both-hover.png" width="330" alt="LithosAI card with a bubble listing every Kimi K3 tier and its speed"> | <img src="Preview/balance-both-dark.png" width="330" alt="The same cards in dark mode"> |
+| *Hovering Kimi K3 lists its Base / Fast / Ultra tiers, each with its price and speed.* | *Same layout in dark mode.* |
 
 The key editor and a failed refresh, straight in the DeepSeek card:
 
@@ -146,7 +156,7 @@ menu bar extras.
 | **Left-click** the whale | Open / close the details panel |
 | **Right-click** the whale | Quick menu: preview peak, preview off-peak, follow live time, show countdown in the menu bar, quit |
 | **Account balance** | The DeepSeek card appears in the panel once an API key is saved. **Refresh** queries every enabled provider immediately; the time of the last successful refresh sits next to the button |
-| **LithosAI card** | Off by default. Once it has a session, the card shows the prepaid balance, **Sign out** and its three tier prices. Turning the switch off only hides the card — the WebKit session is kept, so turning it back on does not ask you to sign in again. **Sign out** clears this app’s WebView website data, including OAuth sign-in cookies |
+| **LithosAI card** | Off by default. Once it has a session, the card shows the prepaid balance, **Sign out** and one price line per model it sells — its cheapest tier and advertised speed. Hover a line to see every tier of that model in a floating bubble. Turning the switch off only hides the card — the WebKit session is kept, so turning it back on does not ask you to sign in again. **Sign out** clears this app’s WebView website data, including OAuth sign-in cookies |
 | **Enter / Change API Key** | Opens the key field in the panel. The key is stored in the macOS Keychain; **Remove** deletes it |
 | **Preview** picker in the panel | Force the app to *display* peak or off-peak so you can see both looks at any time. It only changes what is drawn, never the real pricing |
 | **Show countdown in the menu bar** | Adds an `HH:MM:SS` countdown next to the whale (off by default) |
@@ -159,8 +169,10 @@ The panel contains one card per provider, so everything about a provider sits in
 - **DeepSeek** — the current period and its price multiplier (`×1.0` / `×0.5`), a "current unit
   price" comparison bar, the countdown to the next switch plus how far through the current block you
   are, and then the balance once an API key is saved (total, plus the granted / topped-up split);
-- **LithosAI** — an on/off switch, the prepaid balance with **Sign out**, and its three tier prices
-  (Base / Fast / Ultra) as a limited-time offer. Turn the switch off and the whole card disappears;
+- **LithosAI** — an on/off switch, the prepaid balance with **Sign out**, and one line per model it
+  sells (Kimi K3, DeepSeek V4.1 Flash, GLM-5.3, GLM-5.3-Flash): the cheapest tier on sale with its
+  advertised speed, with the rest of that model's tiers in a hover bubble. All of it is a
+  limited-time offer. Turn the switch off and the whole card disappears;
 - one shared **Refresh** button and the time of the last successful refresh, above the cards;
 - a monthly pricing calendar for planning ahead, switchable to a 7×24 weekly heat map;
 - the toggles above, a preview picker, and the update controls.
@@ -216,11 +228,24 @@ expired key is reported as *"The API key is invalid or expired. Replace it?"*. A
 replaced too, from the small key button next to the refresh time.
 
 **What do the LithosAI prices mean?**
-Every multiple in the app uses **DeepSeek's peak price as `×1`**, so the two providers can be compared
-directly. DeepSeek's own row follows the clock (peak `×1`, off-peak `×0.5`); LithosAI does not have
-peak hours, so its three tiers are the same all day: Base `×0.50`, Fast `×0.83`, Ultra `×1.17`. Those
-are its current **limited-time** prices, read from a constant in the app rather than from the network,
-and they may change — the number to trust is always the one in your LithosAI console.
+Every multiple in the app uses **DeepSeek's peak output price as `×1`** — $1.20 per million output
+tokens — so providers and models can be compared directly. DeepSeek's own row follows the clock
+(peak `×1`, off-peak `×0.5`); LithosAI has no peak hours, so its rows are the same all day:
+
+| Model | Base | Fast | Ultra |
+| --- | :---: | :---: | :---: |
+| Kimi K3 | `×10` | `×16.67` | `×23.33` |
+| DeepSeek V4.1 Flash | `×0.50` | `×0.83` | `×1.17` |
+| GLM-5.3 | `×2.75` | — | — |
+| GLM-5.3-Flash | `×0.42` | — | `×0.83` |
+
+Those are its current **limited-time** prices, read from a constant in the app rather than from the
+network, and they may change — the number to trust is always the one in your LithosAI console. Models
+it has not priced yet (Qwen 3.8, Gemma 4, GPT OSS) are left out.
+
+The card only lists the cheapest tier of each model; hover a line for the rest. Speeds are single-user
+output rates as LithosAI advertises them — Kimi K3 80+ / 180+ / 250–1000 tok/s, DeepSeek V4.1 Flash
+250+ / 350+ / 450+, GLM-5.3 200+, GLM-5.3-Flash 250+ / 450+.
 
 **Does turning the LithosAI switch off sign me out?**
 No. The switch only decides whether the card is shown; the WebKit session and its cookies stay, so
@@ -284,8 +309,9 @@ the machine is back.
   used to sit in the panel header with its balance half a screen below, and LithosAI's tiers had
   nowhere to go. One card per provider means neither provider's rules can leak into the other's.
 - The prices themselves are a small table (`Models/ProviderRateSheet.swift`) keyed to DeepSeek's peak
-  price; DeepSeek's rows are `timeOfDay`, LithosAI's are `flat`, and a check in
-  `./Tools/render-preview.sh rates` fails if the current period is ever multiplied into a fixed tier.
+  output price, grouped per model; DeepSeek's rows are `timeOfDay`, LithosAI's are `flat`, and a check
+  in `./Tools/render-preview.sh rates` fails if the current period is ever multiplied into a fixed
+  tier, or if a model on sale is missing from the table.
 
 Architecture, tooling, measurements and the pitfalls found along the way are documented in
 **[Docs/DEVELOPMENT.md](Docs/DEVELOPMENT.md)**.

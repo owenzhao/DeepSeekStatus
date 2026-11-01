@@ -489,22 +489,54 @@ func checkSchedule() {
 // MARK: - 价目自检
 
 /// LithosAI 的报价不分峰谷，任何时候都必须是同一组数字；DeepSeek 则只有一个时段在收钱。
-/// 这段检查专门盯住「有人又把当前时段乘/除进去」这类回归。
+/// 这段检查专门盯住「有人又把当前时段乘/除进去」这类回归，
+/// 顺便把价目页上的输出价逐个对一遍，防止漏掉某个模型或某一档。
 @MainActor
 func checkRates() {
     var failures = 0
     let lithos = ProviderRateSheet.lithos
-    let expected: [String: Double] = ["Base": 0.5, "Fast": 0.5 * 10 / 6, "Ultra": 0.5 * 14 / 6]
+
+    /// 价目页上的输出价（美元 / 百万 tokens），应该正好折成面板上这些倍数。
+    let listed: [(model: String, tier: String, output: Double)] = [
+        ("Kimi K3", "Base", 12), ("Kimi K3", "Fast", 20), ("Kimi K3", "Ultra", 28),
+        ("DeepSeek V4.1 Flash", "Base", 0.6), ("DeepSeek V4.1 Flash", "Fast", 1), ("DeepSeek V4.1 Flash", "Ultra", 1.4),
+        ("GLM-5.3", "Base", 3.3),
+        ("GLM-5.3-Flash", "Base", 0.5), ("GLM-5.3-Flash", "Ultra", 1),
+    ]
 
     for period in PricePeriod.allCases {
-        for rate in lithos.rates {
-            let shown = lithos.displayedMultiplier(of: rate)
-            let want = expected[rate.name] ?? -1
-            let ok = abs(shown - want) < 1e-9
+        for want in listed {
+            let rate = lithos.groups.first { $0.model == want.model }?.rates.first { $0.name == want.tier }
+            let shown = rate.map { lithos.displayedMultiplier(of: $0) } ?? -1
+            let expected = want.output / ProviderRateSheet.referenceOutputPrice
+            let ok = rate != nil && abs(shown - expected) < 1e-9
             if !ok { failures += 1 }
-            print("\(ok ? "✅" : "❌") LithosAI \(rate.name) @ \(period.title) = ×\(String(format: "%.2f", shown))（应为 ×\(String(format: "%.2f", want))）")
+            print("\(ok ? "✅" : "❌") LithosAI \(want.model) \(want.tier)（输出 $\(want.output)）@ \(period.title) = ×\(String(format: "%.2f", shown))（应为 ×\(String(format: "%.2f", expected))）")
         }
     }
+
+    // 反过来查：面板上有、价目页清单里没有的档位，说明有人加了价却没更新这段自检。
+    let unlisted = lithos.groups.flatMap { group in
+        group.rates.map { "\(group.model ?? "?") \($0.name)" }
+    }.filter { entry in
+        !listed.contains { "\($0.model) \($0.tier)" == entry }
+    }
+    let coversAll = unlisted.isEmpty
+    if !coversAll { failures += 1 }
+    print("\(coversAll ? "✅" : "❌") LithosAI 价目与价目页一致\(coversAll ? "" : "，多出：\(unlisted.joined(separator: "、"))")")
+
+    // 卡片默认只写每个模型的第一档，所以档位必须是从低到高排的；顺便要求每档都标了速度。
+    for group in lithos.groups {
+        let name = group.model ?? "?"
+        let ordered = zip(group.rates, group.rates.dropFirst()).allSatisfy { $0.multiplier <= $1.multiplier }
+        if !ordered { failures += 1 }
+        print("\(ordered ? "✅" : "❌") LithosAI \(name) 档位从低到高排列（第一档即最低档）")
+
+        let speeds = group.rates.allSatisfy { !($0.speed ?? "").isEmpty }
+        if !speeds { failures += 1 }
+        print("\(speeds ? "✅" : "❌") LithosAI \(name) 每档都标了速度")
+    }
+
     let flatOK = !lithos.variesWithTimeOfDay
     let noNow = PricePeriod.allCases.allSatisfy { period in
         lithos.rates.allSatisfy { !lithos.isCharging($0, in: period) }
@@ -548,6 +580,15 @@ func renderBalanceCards() {
                         .background(Color(nsColor: .windowBackgroundColor)),
                      width: 320, name: name)
     }
+
+    // 鼠标停在 Kimi K3 那行时的样子：全部档位在泡泡里摊开，各自带速度。
+    renderHosted(AccountSection(store: .preview(),
+                               lithos: .preview(enabled: true, state: .loaded("$24.94")),
+                               snapshot: PricingSnapshot(now: Date()), period: .peak,
+                               hoveredRate: "Kimi K3")
+                    .padding(15)
+                    .background(Color(nsColor: .windowBackgroundColor)),
+                 width: 320, name: "balance-both-hover")
 
     // 深色模式下再看一遍：卡片底色、分隔线都是按 primary 的透明度叠出来的，要确认还看得清。
     renderHosted(AccountSection(store: .preview(), lithos: .preview(enabled: true, state: .loaded("$24.94")),

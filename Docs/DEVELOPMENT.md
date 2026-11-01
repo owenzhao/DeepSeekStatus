@@ -401,13 +401,36 @@ both sides, the Friday-evening-to-Monday-morning span, and time-zone independenc
 全部通过 ✅
 ```
 
-`./Tools/render-preview.sh rates` guards the price sheet: every LithosAI tier must read the same in
-both periods (Base `×0.50`, Fast `×0.83`, Ultra `×1.17`), never get a "now" mark, and DeepSeek must
-mark exactly one row matching the current multiplier. It was added after the period multiplier was
-divided into the fixed tiers once, which doubled every LithosAI price off-peak:
+`balance` also renders `balance-both-hover.png`, which seeds `ProviderRateRows` with
+`previewHoveredModel` so the hover bubble can be inspected without a running app (the real bubble only
+appears while the pointer sits on a row, and the panel is a `.nonactivatingPanel`, so `.onHover` is not
+used — see `HoverArea`).
+
+Two pitfalls are baked into that bubble, both found by looking at a real screenshot rather than the
+offscreen render:
+
+- It is an overlay of the whole price block (row positions come from a `RowFrames` preference), not of
+  the hovered row. As a row overlay it was a *sibling* of the rows below and of the limited-time
+  footnote, which are drawn later, so both texts bled through each other.
+- It always drops down, never flips up. Flipping made the same gesture land in two different places
+  depending on the row, and the upward variant covered the row's own name. To make an always-down
+  bubble fit, the price block keeps 8pt of room below its last line, so even the bottom row's bubble
+  stays inside the card instead of poking into the schedule section below.
+- It has no shadow. A shadow pushed the popover into an offscreen composition, and macOS's
+  window-picker in screenshot mode kept highlighting the app behind the panel while the bubble was up.
+  A stroke plus a slightly lighter fill is enough separation.
+- Rows the bubble covers are hidden (opacity 0, layout untouched) while it is up, together with the two
+  footnote lines. Otherwise the bubble's bottom edge slices whichever row it lands on and the half
+  glyphs below it read as text bleeding through.
+
+`./Tools/render-preview.sh rates` guards the price sheet: every LithosAI tier of every model on sale
+must read the same in both periods and fold back to its published output price ÷ $1.20, never get a
+"now" mark, and DeepSeek must mark exactly one row matching the current multiplier. It also fails when
+a tier exists in the app that the list of published prices doesn't know about. It was added after the
+period multiplier was divided into the fixed tiers once, which doubled every LithosAI price off-peak:
 
 ```
-✅ LithosAI Base @ Off-peak hours = ×0.50（应为 ×0.50）
+✅ LithosAI DeepSeek V4.1 Flash Base（输出 $0.6）@ Off-peak hours = ×0.50（应为 ×0.50）
 ...
 价目全部通过 ✅
 ```
